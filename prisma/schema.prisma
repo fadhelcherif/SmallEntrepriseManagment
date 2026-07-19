@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum RoleUtilisateur {
+  ADMINISTRATEUR
+  EMPLOYE
+}
+
+enum TypeCommande {
+  ACHAT_FOURNISSEUR
+  VENTE_CLIENT
+}
+
+enum StatutCommande {
+  BROUILLON
+  VALIDEE
+  RECUE
+  ANNULEE
+}
+
+enum TypeMouvement {
+  ENTREE
+  SORTIE
+  AJUSTEMENT
+}
+
+// ---------- Racine multi-tenant ----------
+
+model Entreprise {
+  id                 String   @id @default(uuid())
+  nom                String
+  adresse            String
+  devise             String
+  typeMetier         String
+  categorie          String?
+  logo               String?
+  couleurPrimaire    String?
+  couleurSecondaire  String?
+  dateCreation       DateTime @default(now())
+
+  utilisateurs           Utilisateur[]
+  fournisseurs           Fournisseur[]
+  produits               Produit[]
+  commandes              Commande[]
+  charges                Charge[]
+  attributsPersonnalises AttributPersonnalise[]
+
+  @@map("entreprises")
+}
+
+// ---------- Utilisateurs ----------
+
+model Utilisateur {
+  id              String          @id @default(uuid())
+  entrepriseId    String
+  nom             String
+  email           String          @unique
+  motDePasseHash  String
+  role            RoleUtilisateur
+  actif           Boolean         @default(true)
+  dateCreation    DateTime        @default(now())
+
+  entreprise      Entreprise       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  journalActions  JournalAction[]
+  mouvementsStock MouvementStock[]
+  commandes       Commande[]
+
+  @@index([entrepriseId])
+  @@map("utilisateurs")
+}
+
+model JournalAction {
+  id            String   @id @default(uuid())
+  utilisateurId String
+  action        String
+  dateAction    DateTime @default(now())
+  details       String?
+
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+
+  @@index([utilisateurId])
+  @@map("journal_actions")
+}
+
+// ---------- Fournisseurs ----------
+
+model Fournisseur {
+  id                  String  @id @default(uuid())
+  entrepriseId        String
+  nom                 String
+  contact             String?
+  adresse             String?
+  delaiLivraisonJours Int?
+
+  entreprise          Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  commandes           Commande[]
+
+  @@index([entrepriseId])
+  @@map("fournisseurs")
+}
+
+// ---------- Produits ----------
+
+model Produit {
+  id                String    @id @default(uuid())
+  entrepriseId      String
+  nom               String
+  description       String?
+  prixUnitaire      Decimal   @db.Decimal(12, 2)
+  quantiteStock     Int       @default(0)
+  seuilAlerte       Int       @default(0)
+  dateExpiration    DateTime?
+
+  entreprise             Entreprise               @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  lignesCommande         LigneCommande[]
+  mouvementsStock        MouvementStock[]
+  alertes                Alerte[]
+  previsionsIA           PrevisionIA[]
+  valeursAttributs       ValeurAttribut[]
+  recommandationsReappro RecommandationReappro[]
+
+  @@index([entrepriseId])
+  @@map("produits")
+}
+
+// ---------- Commandes (achats et ventes) ----------
+
+model Commande {
+  id             String         @id @default(uuid())
+  entrepriseId   String
+  utilisateurId  String
+  fournisseurId  String?
+  type           TypeCommande
+  statut         StatutCommande @default(BROUILLON)
+  dateCommande   DateTime       @default(now())
+
+  entreprise     Entreprise      @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  utilisateur    Utilisateur     @relation(fields: [utilisateurId], references: [id])
+  fournisseur    Fournisseur?    @relation(fields: [fournisseurId], references: [id])
+  lignesCommande LigneCommande[]
+
+  @@index([entrepriseId])
+  @@index([fournisseurId])
+  @@map("commandes")
+}
+
+model LigneCommande {
+  id            String  @id @default(uuid())
+  commandeId    String
+  produitId     String
+  quantite      Int
+  prixApplique  Decimal @db.Decimal(12, 2)
+
+  commande      Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+  produit       Produit  @relation(fields: [produitId], references: [id])
+
+  @@index([commandeId])
+  @@index([produitId])
+  @@map("lignes_commande")
+}
+
+// ---------- Stock ----------
+
+model MouvementStock {
+  id            String        @id @default(uuid())
+  produitId     String
+  utilisateurId String?
+  type          TypeMouvement
+  quantite      Int
+  date          DateTime      @default(now())
+  motif         String?
+
+  produit       Produit      @relation(fields: [produitId], references: [id], onDelete: Cascade)
+  utilisateur   Utilisateur? @relation(fields: [utilisateurId], references: [id])
+
+  @@index([produitId])
+  @@map("mouvements_stock")
+}
+
+model Alerte {
+  id             String   @id @default(uuid())
+  produitId      String
+  type           String
+  message        String
+  dateGeneration DateTime @default(now())
+  lue            Boolean  @default(false)
+
+  produit        Produit @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@index([produitId])
+  @@map("alertes")
+}
+
+// ---------- Finance ----------
+
+model Charge {
+  id            String   @id @default(uuid())
+  entrepriseId  String
+  type          String
+  montant       Decimal  @db.Decimal(12, 2)
+  dateEcheance  DateTime
+
+  entreprise    Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  @@index([entrepriseId])
+  @@map("charges")
+}
+
+// ---------- Attributs personnalises ----------
+
+model AttributPersonnalise {
+  id            String   @id @default(uuid())
+  entrepriseId  String
+  nom           String
+  typeChamp     String
+  entiteCible   String
+  obligatoire   Boolean  @default(false)
+
+  entreprise    Entreprise       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  valeurs       ValeurAttribut[]
+
+  @@index([entrepriseId])
+  @@map("attributs_personnalises")
+}
+
+model ValeurAttribut {
+  id         String @id @default(uuid())
+  attributId String
+  produitId  String
+  valeur     String
+
+  attribut   AttributPersonnalise @relation(fields: [attributId], references: [id], onDelete: Cascade)
+  produit    Produit              @relation(fields: [produitId], references: [id], onDelete: Cascade)
+
+  @@index([attributId])
+  @@index([produitId])
+  @@map("valeurs_attributs")
+}
+
+// ---------- IA : previsions et reapprovisionnement ----------
+
+model PrevisionIA {
+  id              String   @id @default(uuid())
+  produitId       String
+  dateGeneration  DateTime @default(now())
+  periode         String
+  quantitePrevue  Decimal  @db.Decimal(12, 2)
+
+  produit                Produit                  @relation(fields: [produitId], references: [id], onDelete: Cascade)
+  recommandationsReappro RecommandationReappro[]
+
+  @@index([produitId])
+  @@map("previsions_ia")
+}
+
+model RecommandationReappro {
+  id                String   @id @default(uuid())
+  produitId         String
+  previsionId       String?
+  dateGeneration    DateTime @default(now())
+  quantiteSuggeree  Int
+
+  produit           Produit      @relation(fields: [produitId], references: [id], onDelete: Cascade)
+  prevision         PrevisionIA? @relation(fields: [previsionId], references: [id])
+
+  @@index([produitId])
+  @@map("recommandations_reappro")
+}
