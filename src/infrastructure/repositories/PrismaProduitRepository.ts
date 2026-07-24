@@ -1,8 +1,10 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 import type { NouveauProduit, Produit } from "../../domain/entities/Produit";
 import type { ProduitRepository } from "../../domain/repositories/ProduitRepository";
-import { prisma } from "../db";
+import { prisma as defaultPrisma } from "../db";
+
+type PrismaClientLike = PrismaClient | Prisma.TransactionClient;
 
 function toProduit(
   produit: {
@@ -29,8 +31,10 @@ function toProduit(
 }
 
 export class PrismaProduitRepository implements ProduitRepository {
+  constructor(private readonly client: PrismaClientLike = defaultPrisma) {}
+
   async creer(produit: NouveauProduit, entrepriseId: string): Promise<Produit> {
-    const produitCree = await prisma.produit.create({
+    const produitCree = await this.client.produit.create({
       data: {
         entrepriseId,
         nom: produit.nom,
@@ -45,8 +49,17 @@ export class PrismaProduitRepository implements ProduitRepository {
     return toProduit(produitCree);
   }
 
+  async modifierStock(id: string, quantiteStock: number): Promise<Produit> {
+    const produitModifie = await this.client.produit.update({
+      where: { id },
+      data: { quantiteStock },
+    });
+
+    return toProduit(produitModifie);
+  }
+
   async modifier(id: string, donnees: Partial<NouveauProduit>): Promise<Produit> {
-    const produitModifie = await prisma.produit.update({
+    const produitModifie = await this.client.produit.update({
       where: { id },
       data: {
         ...(donnees.nom !== undefined ? { nom: donnees.nom } : {}),
@@ -61,14 +74,22 @@ export class PrismaProduitRepository implements ProduitRepository {
     return toProduit(produitModifie);
   }
 
+  async trouverParId(id: string): Promise<Produit | null> {
+    const produit = await this.client.produit.findUnique({
+      where: { id },
+    });
+
+    return produit ? toProduit(produit) : null;
+  }
+
   async supprimer(id: string): Promise<void> {
-    await prisma.produit.delete({
+    await this.client.produit.delete({
       where: { id },
     });
   }
 
   async listerParEntreprise(entrepriseId: string): Promise<Produit[]> {
-    const produits = await prisma.produit.findMany({
+    const produits = await this.client.produit.findMany({
       where: {
         entrepriseId,
       },

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 import type { Utilisateur } from "../../domain/entities/Utilisateur";
 
-export type SessionUtilisateur = Pick<Utilisateur, "id" | "entrepriseId" | "role">;
+export type SessionUtilisateur = Pick<Utilisateur, "id" | "entrepriseId" | "role" | "nom">;
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
@@ -22,6 +22,7 @@ export async function creerSession(utilisateur: SessionUtilisateur): Promise<voi
   const secret = getSessionSecret();
   const token = await new SignJWT({
     userId: utilisateur.id,
+    nom: utilisateur.nom,
     entrepriseId: utilisateur.entrepriseId,
     role: utilisateur.role,
   })
@@ -53,15 +54,22 @@ export async function lireSession(): Promise<SessionUtilisateur | null> {
     const { payload } = await jwtVerify(token, getSessionSecret());
 
     const userId = payload.userId;
+    const nom = payload.nom;
     const entrepriseId = payload.entrepriseId;
     const role = payload.role;
 
-    if (typeof userId !== "string" || typeof entrepriseId !== "string" || (role !== "ADMINISTRATEUR" && role !== "EMPLOYE")) {
+    if (
+      typeof userId !== "string"
+      || typeof nom !== "string"
+      || typeof entrepriseId !== "string"
+      || (role !== "ADMINISTRATEUR" && role !== "EMPLOYE")
+    ) {
       return null;
     }
 
     return {
       id: userId,
+      nom,
       entrepriseId,
       role,
     };

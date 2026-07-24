@@ -7,20 +7,38 @@ export class EntrepriseInvalideError extends Error {
   }
 }
 
-export function validerNouvelleEntreprise(entreprise: NouvelleEntreprise): void {
-  if (!entreprise.nom || entreprise.nom.trim().length === 0) {
-    throw new EntrepriseInvalideError("Le nom de l'entreprise est obligatoire.");
+function validerTexteObligatoire(valeur: string | undefined | null, message: string): void {
+  if (!valeur || valeur.trim().length === 0) {
+    throw new EntrepriseInvalideError(message);
   }
+}
 
-  if (!entreprise.adresse || entreprise.adresse.trim().length === 0) {
-    throw new EntrepriseInvalideError("L'adresse de l'entreprise est obligatoire.");
+function validerTexteOptionnel(valeur: string | undefined | null, message: string): void {
+  if (valeur !== undefined && valeur !== null && valeur.trim().length === 0) {
+    throw new EntrepriseInvalideError(message);
   }
+}
 
-  if (!entreprise.devise || entreprise.devise.trim().length === 0) {
-    throw new EntrepriseInvalideError("La devise de l'entreprise est obligatoire.");
-  }
+export function validerNouvelleEntreprise(entreprise: Partial<NouvelleEntreprise>): void {
+  validerTexteObligatoire(entreprise.nom, "Le nom de l'entreprise est obligatoire.");
+  validerTexteObligatoire(entreprise.adresse, "L'adresse de l'entreprise est obligatoire.");
+  validerTexteObligatoire(entreprise.devise, "La devise de l'entreprise est obligatoire.");
+  validerTexteObligatoire(entreprise.typeMetier, "Le type de métier de l'entreprise est obligatoire.");
 
-  if (!entreprise.typeMetier || entreprise.typeMetier.trim().length === 0) {
-    throw new EntrepriseInvalideError("Le type de métier de l'entreprise est obligatoire.");
-  }
+  validerTexteOptionnel(entreprise.categorie, "La catégorie de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.logo, "Le logo de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.couleurPrimaire, "La couleur primaire de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.couleurSecondaire, "La couleur secondaire de l'entreprise ne peut pas être vide.");
+}
+
+export function validerModificationEntreprise(entreprise: Partial<NouvelleEntreprise>): void {
+  validerTexteOptionnel(entreprise.nom, "Le nom de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.adresse, "L'adresse de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.devise, "La devise de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.typeMetier, "Le type de métier de l'entreprise ne peut pas être vide.");
+
+  validerTexteOptionnel(entreprise.categorie, "La catégorie de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.logo, "Le logo de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.couleurPrimaire, "La couleur primaire de l'entreprise ne peut pas être vide.");
+  validerTexteOptionnel(entreprise.couleurSecondaire, "La couleur secondaire de l'entreprise ne peut pas être vide.");
 }

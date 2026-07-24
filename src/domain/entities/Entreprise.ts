@@ -4,6 +4,10 @@ export type Entreprise = {
   adresse: string;
   devise: string;
   typeMetier: string;
+  categorie?: string | null;
+  logo?: string | null;
+  couleurPrimaire?: string | null;
+  couleurSecondaire?: string | null;
 };
 
 export type NouvelleEntreprise = {
@@ -11,4 +15,8 @@ export type NouvelleEntreprise = {
   adresse: string;
   devise: string;
   typeMetier: string;
+  categorie?: string | null;
+  logo?: string | null;
+  couleurPrimaire?: string | null;
+  couleurSecondaire?: string | null;
 };
