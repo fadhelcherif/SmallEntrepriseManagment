@@ -2,27 +2,26 @@
 
 import { useActionState } from "react";
 
-import type { CreerProduitState } from "./actions";
+import type { CreerFournisseurState } from "./actions";
 
-type ProduitFormProps = {
+type FournisseursFormProps = {
   entrepriseId: string;
-  action: (entrepriseId: string, previousState: CreerProduitState, formData: FormData) => Promise<CreerProduitState>;
+  action: (entrepriseId: string, previousState: CreerFournisseurState, formData: FormData) => Promise<CreerFournisseurState>;
 };
 
-const initialState: CreerProduitState = {
+const initialState: CreerFournisseurState = {
   message: undefined,
   success: false,
 };
 
-export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
-  const boundAction = action.bind(null, entrepriseId);
-  const [state, formAction, isPending] = useActionState(boundAction, initialState);
+export function FournisseursForm({ entrepriseId, action }: FournisseursFormProps) {
+  const [state, formAction, isPending] = useActionState(action.bind(null, entrepriseId), initialState);
 
   return (
-    <section id="nouveau-produit" className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-zinc-900">Nouveau produit</h2>
-        <p className="mt-1 text-sm text-zinc-500">Ajoute un produit au catalogue de l’entreprise.</p>
+        <h2 className="text-lg font-semibold text-zinc-900">Nouveau fournisseur</h2>
+        <p className="mt-1 text-sm text-zinc-500">Ajoute un fournisseur au catalogue de l’entreprise.</p>
       </div>
 
       <form action={formAction} className="grid gap-4">
@@ -33,31 +32,37 @@ export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
             type="text"
             required
             className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="Ex: Café moulu 1kg"
+            placeholder="Ex: Fournitures Express"
           />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Prix unitaire</span>
+          <span className="text-sm font-medium text-zinc-700">Contact</span>
           <input
-            name="prixUnitaire"
-            type="number"
-            step="0.01"
-            min="0"
-            required
+            name="contact"
+            type="text"
             className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="19.90"
+            placeholder="Téléphone ou email"
           />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Seuil d’alerte</span>
+          <span className="text-sm font-medium text-zinc-700">Adresse</span>
           <input
-            name="seuilAlerte"
+            name="adresse"
+            type="text"
+            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+            placeholder="Adresse du fournisseur"
+          />
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-zinc-700">Délai de livraison (jours)</span>
+          <input
+            name="delaiLivraisonJours"
             type="number"
             min="0"
             step="1"
-            required
             className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
             placeholder="3"
           />
@@ -74,7 +79,7 @@ export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
           disabled={isPending}
           className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isPending ? "Création..." : "Créer le produit"}
+          {isPending ? "Création..." : "Créer le fournisseur"}
         </button>
       </form>
     </section>

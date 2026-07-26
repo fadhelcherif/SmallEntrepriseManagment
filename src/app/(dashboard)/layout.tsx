@@ -46,6 +46,12 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/produits">
             Produits
           </Link>
+          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/fournisseurs">
+            Fournisseurs
+          </Link>
+          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/commandes-fournisseurs">
+            Commandes fournisseurs
+          </Link>
           <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/alertes">
             Alertes
           </Link>
