@@ -1,8 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
+import { PackageCheck } from "lucide-react";
 
 import type { MouvementStockState } from "./actions";
+import { Bouton } from "../../../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../../../_components/ui/champClasses";
+import { Panel } from "../../../../_components/ui/Panel";
 
 type MouvementStockFormProps = {
   produitId: string;
@@ -19,57 +24,34 @@ export function MouvementStockForm({ produitId, action }: MouvementStockFormProp
   const [state, formAction, isPending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} className="grid gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-zinc-900">Nouveau mouvement</h2>
-        <p className="mt-1 text-sm text-zinc-500">Enregistre une entrée, une sortie ou un ajustement.</p>
-      </div>
+    <Panel title="Nouveau mouvement" description="Enregistre une entrée, une sortie ou un ajustement." className="h-fit">
+      <form action={formAction} className="grid gap-4">
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-stone-700">Type</span>
+          <select name="type" required className={champClasses}>
+            <option value="ENTREE">Entrée</option>
+            <option value="SORTIE">Sortie</option>
+            <option value="AJUSTEMENT">Ajustement</option>
+          </select>
+        </label>
 
-      <label className="grid gap-2">
-        <span className="text-sm font-medium text-zinc-700">Type</span>
-        <select name="type" required className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900">
-          <option value="ENTREE">ENTREE</option>
-          <option value="SORTIE">SORTIE</option>
-          <option value="AJUSTEMENT">AJUSTEMENT</option>
-        </select>
-      </label>
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-stone-700">Quantité</span>
+          <input name="quantite" type="number" min="0" step="1" required className={champClasses} placeholder="1" />
+        </label>
 
-      <label className="grid gap-2">
-        <span className="text-sm font-medium text-zinc-700">Quantité</span>
-        <input
-          name="quantite"
-          type="number"
-          min="0"
-          step="1"
-          required
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-          placeholder="1"
-        />
-      </label>
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-stone-700">Motif</span>
+          <textarea name="motif" rows={3} className={champClasses} placeholder="Ex: correction d'inventaire" />
+        </label>
 
-      <label className="grid gap-2">
-        <span className="text-sm font-medium text-zinc-700">Motif</span>
-        <textarea
-          name="motif"
-          rows={3}
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-          placeholder="Ex: correction d'inventaire"
-        />
-      </label>
+        <MessageFormulaire message={state.message} success={state.success} />
 
-      {state.message ? (
-        <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-          {state.message}
-        </p>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isPending ? "Enregistrement..." : "Enregistrer le mouvement"}
-      </button>
-    </form>
+        <Bouton type="submit" disabled={isPending}>
+          <PackageCheck className="h-4 w-4" strokeWidth={1.75} />
+          {isPending ? "Enregistrement..." : "Enregistrer le mouvement"}
+        </Bouton>
+      </form>
+    </Panel>
   );
 }

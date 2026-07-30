@@ -12,7 +12,8 @@ function toProduit(
     entrepriseId: string;
     nom: string;
     description: string | null;
-    prixUnitaire: Prisma.Decimal;
+    prixAchat: Prisma.Decimal;
+    prixVente: Prisma.Decimal;
     quantiteStock: number;
     seuilAlerte: number;
     dateExpiration: Date | null;
@@ -23,7 +24,8 @@ function toProduit(
     entrepriseId: produit.entrepriseId,
     nom: produit.nom,
     description: produit.description,
-    prixUnitaire: produit.prixUnitaire.toNumber(),
+    prixAchat: produit.prixAchat.toNumber(),
+    prixVente: produit.prixVente.toNumber(),
     quantiteStock: produit.quantiteStock,
     seuilAlerte: produit.seuilAlerte,
     dateExpiration: produit.dateExpiration,
@@ -39,7 +41,8 @@ export class PrismaProduitRepository implements ProduitRepository {
         entrepriseId,
         nom: produit.nom,
         description: produit.description ?? null,
-        prixUnitaire: new Prisma.Decimal(produit.prixUnitaire),
+        prixAchat: new Prisma.Decimal(produit.prixAchat),
+        prixVente: new Prisma.Decimal(produit.prixVente),
         quantiteStock: produit.quantiteStock ?? 0,
         seuilAlerte: produit.seuilAlerte ?? 0,
         dateExpiration: produit.dateExpiration ?? null,
@@ -64,7 +67,8 @@ export class PrismaProduitRepository implements ProduitRepository {
       data: {
         ...(donnees.nom !== undefined ? { nom: donnees.nom } : {}),
         ...(donnees.description !== undefined ? { description: donnees.description } : {}),
-        ...(donnees.prixUnitaire !== undefined ? { prixUnitaire: new Prisma.Decimal(donnees.prixUnitaire) } : {}),
+        ...(donnees.prixAchat !== undefined ? { prixAchat: new Prisma.Decimal(donnees.prixAchat) } : {}),
+        ...(donnees.prixVente !== undefined ? { prixVente: new Prisma.Decimal(donnees.prixVente) } : {}),
         ...(donnees.quantiteStock !== undefined ? { quantiteStock: donnees.quantiteStock } : {}),
         ...(donnees.seuilAlerte !== undefined ? { seuilAlerte: donnees.seuilAlerte } : {}),
         ...(donnees.dateExpiration !== undefined ? { dateExpiration: donnees.dateExpiration } : {}),

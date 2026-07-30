@@ -1,8 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
+import { PackagePlus } from "lucide-react";
 
 import type { CreerProduitState } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../_components/ui/champClasses";
+import { Panel } from "../../_components/ui/Panel";
 
 type ProduitFormProps = {
   entrepriseId: string;
@@ -19,64 +24,53 @@ export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
   const [state, formAction, isPending] = useActionState(boundAction, initialState);
 
   return (
-    <section id="nouveau-produit" className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-zinc-900">Nouveau produit</h2>
-        <p className="mt-1 text-sm text-zinc-500">Ajoute un produit au catalogue de l’entreprise.</p>
-      </div>
-
+    <Panel id="nouveau-produit" title="Nouveau produit" description="Ajoute un produit au catalogue de l'entreprise." className="h-fit">
       <form action={formAction} className="grid gap-4">
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Nom</span>
-          <input
-            name="nom"
-            type="text"
-            required
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="Ex: Café moulu 1kg"
-          />
+          <span className="text-sm font-medium text-stone-700">Nom</span>
+          <input name="nom" type="text" required className={champClasses} placeholder="Ex: Café moulu 1kg" />
         </label>
+
+        <div className="grid gap-4">
+          <label className="grid gap-2">
+            <span className="text-sm font-medium text-stone-700">Prix d’achat</span>
+            <input
+              name="prixAchat"
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              className={champClasses}
+              placeholder="12.00"
+            />
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-sm font-medium text-stone-700">Prix de vente</span>
+            <input
+              name="prixVente"
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              className={champClasses}
+              placeholder="19.90"
+            />
+          </label>
+        </div>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Prix unitaire</span>
-          <input
-            name="prixUnitaire"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="19.90"
-          />
+          <span className="text-sm font-medium text-stone-700">Seuil d’alerte</span>
+          <input name="seuilAlerte" type="number" min="0" step="1" required className={champClasses} placeholder="3" />
         </label>
 
-        <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Seuil d’alerte</span>
-          <input
-            name="seuilAlerte"
-            type="number"
-            min="0"
-            step="1"
-            required
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="3"
-          />
-        </label>
+        <MessageFormulaire message={state.message} success={state.success} />
 
-        {state.message ? (
-          <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-            {state.message}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Bouton type="submit" disabled={isPending}>
+          <PackagePlus className="h-4 w-4" strokeWidth={1.75} />
           {isPending ? "Création..." : "Créer le produit"}
-        </button>
+        </Bouton>
       </form>
-    </section>
+    </Panel>
   );
 }

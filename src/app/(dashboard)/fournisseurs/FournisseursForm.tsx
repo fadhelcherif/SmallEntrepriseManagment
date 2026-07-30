@@ -1,8 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
+import { Truck } from "lucide-react";
 
 import type { CreerFournisseurState } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../_components/ui/champClasses";
+import { Panel } from "../../_components/ui/Panel";
 
 type FournisseursFormProps = {
   entrepriseId: string;
@@ -18,70 +23,35 @@ export function FournisseursForm({ entrepriseId, action }: FournisseursFormProps
   const [state, formAction, isPending] = useActionState(action.bind(null, entrepriseId), initialState);
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-zinc-900">Nouveau fournisseur</h2>
-        <p className="mt-1 text-sm text-zinc-500">Ajoute un fournisseur au catalogue de l’entreprise.</p>
-      </div>
-
+    <Panel title="Nouveau fournisseur" description="Ajoute un fournisseur au catalogue de l'entreprise." className="h-fit">
       <form action={formAction} className="grid gap-4">
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Nom</span>
-          <input
-            name="nom"
-            type="text"
-            required
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="Ex: Fournitures Express"
-          />
+          <span className="text-sm font-medium text-stone-700">Nom</span>
+          <input name="nom" type="text" required className={champClasses} placeholder="Ex: Fournitures Express" />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Contact</span>
-          <input
-            name="contact"
-            type="text"
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="Téléphone ou email"
-          />
+          <span className="text-sm font-medium text-stone-700">Contact</span>
+          <input name="contact" type="text" className={champClasses} placeholder="Téléphone ou email" />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Adresse</span>
-          <input
-            name="adresse"
-            type="text"
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="Adresse du fournisseur"
-          />
+          <span className="text-sm font-medium text-stone-700">Adresse</span>
+          <input name="adresse" type="text" className={champClasses} placeholder="Adresse du fournisseur" />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Délai de livraison (jours)</span>
-          <input
-            name="delaiLivraisonJours"
-            type="number"
-            min="0"
-            step="1"
-            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            placeholder="3"
-          />
+          <span className="text-sm font-medium text-stone-700">Délai de livraison (jours)</span>
+          <input name="delaiLivraisonJours" type="number" min="0" step="1" className={champClasses} placeholder="3" />
         </label>
 
-        {state.message ? (
-          <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-            {state.message}
-          </p>
-        ) : null}
+        <MessageFormulaire message={state.message} success={state.success} />
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Bouton type="submit" disabled={isPending}>
+          <Truck className="h-4 w-4" strokeWidth={1.75} />
           {isPending ? "Création..." : "Créer le fournisseur"}
-        </button>
+        </Bouton>
       </form>
-    </section>
+    </Panel>
   );
 }

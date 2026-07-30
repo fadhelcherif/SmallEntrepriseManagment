@@ -2,7 +2,8 @@ export type Produit = {
   id: string;
   entrepriseId: string;
   nom: string;
-  prixUnitaire: number;
+  prixAchat: number;
+  prixVente: number;
   quantiteStock: number;
   seuilAlerte: number;
   description?: string | null;
@@ -11,7 +12,8 @@ export type Produit = {
 
 export type NouveauProduit = {
   nom: string;
-  prixUnitaire: number;
+  prixAchat: number;
+  prixVente: number;
   quantiteStock?: number;
   seuilAlerte?: number;
   description?: string | null;

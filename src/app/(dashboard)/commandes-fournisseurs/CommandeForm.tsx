@@ -1,8 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 import type { CreerCommandeState } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../_components/ui/champClasses";
+import { Panel } from "../../_components/ui/Panel";
 
 type FournisseurOption = {
   id: string;
@@ -12,7 +17,7 @@ type FournisseurOption = {
 type ProduitOption = {
   id: string;
   nom: string;
-  prixUnitaire: number;
+  prixAchat: number;
 };
 
 type Ligne = {
@@ -41,21 +46,20 @@ export function CommandeForm({ entrepriseId, fournisseurs, produits, action, uti
   const lignesJson = useMemo(() => JSON.stringify(lignes), [lignes]);
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-zinc-900">Nouvelle commande fournisseur</h2>
-        <p className="mt-1 text-sm text-zinc-500">Le prix est copié automatiquement depuis le produit au moment de la création.</p>
-      </div>
-
+    <Panel
+      title="Nouvelle commande fournisseur"
+      description="Le prix est copié automatiquement depuis le produit au moment de la création."
+      className="h-fit"
+    >
       <form action={formAction} className="grid gap-4">
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-zinc-700">Fournisseur</span>
+          <span className="text-sm font-medium text-stone-700">Fournisseur</span>
           <select
             name="fournisseurId"
             required
             value={fournisseurId}
             onChange={(event) => setFournisseurId(event.target.value)}
-            className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+            className={champClasses}
           >
             <option value="" disabled>
               Sélectionner un fournisseur
@@ -72,75 +76,73 @@ export function CommandeForm({ entrepriseId, fournisseurs, produits, action, uti
 
         <div className="grid gap-3">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-medium text-zinc-700">Lignes</span>
+            <span className="text-sm font-medium text-stone-700">Lignes</span>
             <button
               type="button"
               onClick={() => setLignes((current) => [...current, { produitId: produits[0]?.id ?? "", quantite: 1 }])}
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900"
+              className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-900 hover:text-stone-900"
             >
+              <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
               Ajouter une ligne
             </button>
           </div>
 
           {lignes.map((ligne, index) => (
-            <div key={index} className="grid gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 sm:grid-cols-[1fr_120px_auto]">
+            <div key={index} className="grid gap-2 rounded-md border border-stone-200 bg-stone-50 p-3">
               <select
                 value={ligne.produitId}
                 onChange={(event) => {
                   const produitId = event.target.value;
                   setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, produitId } : ligneCourante)));
                 }}
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+                className={champClasses}
               >
                 <option value="" disabled>
                   Sélectionner un produit
                 </option>
                 {produits.map((produit) => (
                   <option key={produit.id} value={produit.id}>
-                    {produit.nom} - {produit.prixUnitaire.toFixed(2)}
+                    {produit.nom} — {produit.prixAchat.toFixed(2)}
                   </option>
                 ))}
               </select>
 
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value={ligne.quantite}
-                onChange={(event) => {
-                  const quantite = Number(event.target.value);
-                  setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, quantite } : ligneCourante)));
-                }}
-                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={ligne.quantite}
+                  onChange={(event) => {
+                    const quantite = Number(event.target.value);
+                    setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, quantite } : ligneCourante)));
+                  }}
+                  className={`${champClasses} !w-24 shrink-0`}
+                />
 
-              <button
-                type="button"
-                onClick={() => setLignes((current) => current.filter((_, ligneIndex) => ligneIndex !== index))}
-                disabled={lignes.length === 1}
-                className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Supprimer
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setLignes((current) => current.filter((_, ligneIndex) => ligneIndex !== index))}
+                  disabled={lignes.length === 1}
+                  aria-label="Supprimer la ligne"
+                  title="Supprimer la ligne"
+                  className="ml-auto inline-flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-700 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
 
-        {state.message ? (
-          <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-            {state.message}
-          </p>
-        ) : null}
+        <MessageFormulaire message={state.message} success={state.success} />
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Bouton type="submit" disabled={isPending}>
+          <ShoppingCart className="h-4 w-4" strokeWidth={1.75} />
           {isPending ? "Création..." : "Créer la commande"}
-        </button>
+        </Bouton>
       </form>
-    </section>
+    </Panel>
   );
 }
 

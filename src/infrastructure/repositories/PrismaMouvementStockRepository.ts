@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { Prisma, TypeMouvement as PrismaTypeMouvement, type PrismaClient } from "@prisma/client";
 
 import type { MouvementStock, NouveauMouvementStock } from "../../domain/entities/MouvementStock";
 import type { MouvementStockRepository } from "../../domain/repositories/MouvementStockRepository";
@@ -10,7 +10,7 @@ function toMouvementStock(mouvement: {
   id: string;
   produitId: string;
   utilisateurId: string | null;
-  type: Prisma.TypeMouvement;
+  type: PrismaTypeMouvement;
   quantite: number;
   date: Date;
   motif: string | null;

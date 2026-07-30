@@ -66,6 +66,7 @@ export async function creerCommandeAction(
   const lignes = parserLignes(formData);
 
   const donnees: NouvelleCommande = {
+    type: "ACHAT_FOURNISSEUR",
     fournisseurId,
     lignes,
   };
@@ -97,12 +98,14 @@ export async function creerProduitDepuisCommandeAction(
   formData: FormData,
 ): Promise<CreerProduitInlineState> {
   const nom = String(formData.get("nom") ?? "").trim();
-  const prixUnitaire = Number(formData.get("prixUnitaire"));
+  const prixAchat = Number(formData.get("prixAchat"));
+  const prixVente = Number(formData.get("prixVente"));
   const seuilAlerte = Number(formData.get("seuilAlerte"));
 
   const nouveauProduit: NouveauProduit = {
     nom,
-    prixUnitaire,
+    prixAchat,
+    prixVente,
     seuilAlerte,
   };
 

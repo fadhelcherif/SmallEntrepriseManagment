@@ -9,4 +9,5 @@ export type LigneCommande = {
 export type NouvelleLigneCommande = {
   produitId: string;
   quantite: number;
+  prixApplique?: number;
 };

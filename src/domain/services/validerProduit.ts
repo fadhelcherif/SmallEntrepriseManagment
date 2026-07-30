@@ -12,8 +12,12 @@ export function validerProduit(produit: NouveauProduit): void {
     throw new ProduitInvalideError("Le nom du produit est obligatoire.");
   }
 
-  if (produit.prixUnitaire <= 0) {
-    throw new ProduitInvalideError("Le prix unitaire doit être supérieur à 0.");
+  if (produit.prixAchat <= 0) {
+    throw new ProduitInvalideError("Le prix d'achat doit être supérieur à 0.");
+  }
+
+  if (produit.prixVente <= 0) {
+    throw new ProduitInvalideError("Le prix de vente doit être supérieur à 0.");
   }
 
   if ((produit.seuilAlerte ?? 0) < 0) {

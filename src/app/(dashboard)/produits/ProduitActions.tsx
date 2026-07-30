@@ -1,6 +1,14 @@
+"use client";
+
+import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+
 import type { Produit } from "../../../domain/entities/Produit";
 
 import { modifierProduitAction, supprimerProduitAction } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { champClasses } from "../../_components/ui/champClasses";
+import { Modal } from "../../_components/ui/Modal";
 
 type ProduitActionsProps = {
   entrepriseId: string;
@@ -20,40 +28,79 @@ function formaterDatePourInput(date?: Date | null): string {
 }
 
 export function ProduitActions({ entrepriseId, produit }: ProduitActionsProps) {
+  const [modifierOuvert, setModifierOuvert] = useState(false);
+  const [supprimerOuvert, setSupprimerOuvert] = useState(false);
+
   return (
-    <div className="flex flex-col gap-3">
-      <details className="group rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-        <summary className="cursor-pointer list-none rounded-lg border border-zinc-300 bg-white px-3 py-2 text-center text-sm font-medium text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900">
-          Modifier
-        </summary>
+    <>
+      <div className="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => setModifierOuvert(true)}
+          aria-label={`Modifier ${produit.nom}`}
+          title="Modifier"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stone-300 text-stone-600 transition hover:border-stone-900 hover:text-stone-900"
+        >
+          <Pencil className="h-4 w-4" strokeWidth={1.75} />
+        </button>
 
-        <form action={modifierProduitAction.bind(null, entrepriseId, produit.id)} className="mt-3 grid gap-3">
+        <button
+          type="button"
+          onClick={() => setSupprimerOuvert(true)}
+          aria-label={`Supprimer ${produit.nom}`}
+          title="Supprimer"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 text-red-700 transition hover:border-red-300 hover:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+      </div>
+
+      <Modal
+        open={modifierOuvert}
+        onClose={() => setModifierOuvert(false)}
+        title={`Modifier « ${produit.nom} »`}
+        description="Les changements sont appliqués immédiatement au catalogue."
+      >
+        <form
+          action={modifierProduitAction.bind(null, entrepriseId, produit.id)}
+          onSubmit={() => setModifierOuvert(false)}
+          className="grid gap-4"
+        >
           <label className="grid gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Nom</span>
-            <input
-              name="nom"
-              type="text"
-              required
-              defaultValue={produit.nom}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            />
+            <span className="text-sm font-medium text-stone-700">Nom</span>
+            <input name="nom" type="text" required defaultValue={produit.nom} className={champClasses} />
           </label>
 
-          <label className="grid gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Prix unitaire</span>
-            <input
-              name="prixUnitaire"
-              type="number"
-              step="0.01"
-              min="0"
-              required
-              defaultValue={produit.prixUnitaire}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            />
-          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-stone-700">Prix d’achat</span>
+              <input
+                name="prixAchat"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                defaultValue={produit.prixAchat}
+                className={champClasses}
+              />
+            </label>
+
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-stone-700">Prix de vente</span>
+              <input
+                name="prixVente"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                defaultValue={produit.prixVente}
+                className={champClasses}
+              />
+            </label>
+          </div>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Seuil d’alerte</span>
+            <span className="text-sm font-medium text-stone-700">Seuil d’alerte</span>
             <input
               name="seuilAlerte"
               type="number"
@@ -61,47 +108,52 @@ export function ProduitActions({ entrepriseId, produit }: ProduitActionsProps) {
               step="1"
               required
               defaultValue={produit.seuilAlerte}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+              className={champClasses}
             />
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Description</span>
-            <textarea
-              name="description"
-              rows={3}
-              defaultValue={produit.description ?? ""}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
-            />
+            <span className="text-sm font-medium text-stone-700">Description</span>
+            <textarea name="description" rows={3} defaultValue={produit.description ?? ""} className={champClasses} />
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Date d’expiration</span>
+            <span className="text-sm font-medium text-stone-700">Date d’expiration</span>
             <input
               name="dateExpiration"
               type="date"
               defaultValue={formaterDatePourInput(produit.dateExpiration)}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+              className={champClasses}
             />
           </label>
 
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-700"
-          >
-            Enregistrer
-          </button>
+          <div className="flex justify-end gap-2 pt-2">
+            <Bouton type="button" variante="discret" onClick={() => setModifierOuvert(false)}>
+              Annuler
+            </Bouton>
+            <Bouton type="submit">Enregistrer</Bouton>
+          </div>
         </form>
-      </details>
+      </Modal>
 
-      <form action={supprimerProduitAction.bind(null, entrepriseId, produit.id)}>
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
-        >
-          Supprimer
-        </button>
-      </form>
-    </div>
+      <Modal
+        open={supprimerOuvert}
+        onClose={() => setSupprimerOuvert(false)}
+        title={`Supprimer « ${produit.nom} » ?`}
+        description="Cette action est irréversible et retire définitivement le produit du catalogue."
+      >
+        <div className="flex justify-end gap-2">
+          <Bouton type="button" variante="discret" onClick={() => setSupprimerOuvert(false)}>
+            Annuler
+          </Bouton>
+          <form action={supprimerProduitAction.bind(null, entrepriseId, produit.id)}>
+            <Bouton type="submit" variante="danger">
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+              Supprimer définitivement
+            </Bouton>
+          </form>
+        </div>
+      </Modal>
+    </>
   );
 }

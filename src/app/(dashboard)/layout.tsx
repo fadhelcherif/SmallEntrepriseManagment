@@ -1,10 +1,12 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { LogOut } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { deconnexionAction } from "./actions";
 import { getUtilisateurConnecte } from "../../infrastructure/auth/getUtilisateurConnecte";
 import { PrismaEntrepriseRepository } from "../../infrastructure/repositories/PrismaEntrepriseRepository";
-import { redirect } from "next/navigation";
+import { variablesThemeEntreprise } from "../_lib/entrepriseTheme";
+import { NavLinks } from "./_components/NavLinks";
 
 const entrepriseRepository = new PrismaEntrepriseRepository();
 
@@ -25,48 +27,37 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/login");
   }
 
+  const initiale = entreprise.nom.trim().charAt(0).toUpperCase() || "V";
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 lg:flex">
-      <aside className="border-b border-zinc-200 bg-white px-5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-72 lg:flex-col lg:border-b-0 lg:border-r">
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Vantik</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Zone connectée</h1>
+    <div className="min-h-screen bg-stone-50 text-stone-900 lg:flex" style={variablesThemeEntreprise(entreprise)}>
+      <aside className="border-b border-stone-200 bg-white px-5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-72 lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="mb-8 flex items-center gap-3">
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md font-heading text-lg font-semibold"
+            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+          >
+            {initiale}
+          </div>
+          <div className="min-w-0">
+            <p className="font-heading text-lg font-semibold leading-none text-stone-900">Vantik</p>
+            <p className="mt-1.5 truncate text-xs text-stone-500">{entreprise.nom}</p>
+          </div>
         </div>
 
-        <div className="mb-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm font-medium text-zinc-900">{utilisateurConnecte.nom}</p>
-          <p className="mt-1 text-sm text-zinc-600">{entreprise.nom}</p>
-          <p className="mt-2 text-xs text-zinc-500">{utilisateurConnecte.role}</p>
+        <div className="mb-6 rounded-md border border-stone-200 bg-stone-50 p-3">
+          <p className="truncate text-sm font-medium text-stone-900">{utilisateurConnecte.nom}</p>
+          <p className="mt-1 text-xs uppercase tracking-wide text-stone-500">{utilisateurConnecte.role}</p>
         </div>
 
-        <nav className="flex flex-col gap-2 text-sm font-medium">
-          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/">
-            Accueil
-          </Link>
-          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/produits">
-            Produits
-          </Link>
-          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/fournisseurs">
-            Fournisseurs
-          </Link>
-          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/commandes-fournisseurs">
-            Commandes fournisseurs
-          </Link>
-          <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/alertes">
-            Alertes
-          </Link>
-          {utilisateurConnecte.role === "ADMINISTRATEUR" ? (
-            <Link className="rounded-xl px-3 py-2 transition hover:bg-zinc-100" href="/parametres">
-              Paramètres
-            </Link>
-          ) : null}
-        </nav>
+        <NavLinks afficherParametres={utilisateurConnecte.role === "ADMINISTRATEUR"} />
 
-        <form action={deconnexionAction} className="mt-8">
+        <form action={deconnexionAction} className="mt-6 lg:mt-auto lg:pt-6">
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 transition hover:border-stone-900 hover:text-stone-900"
           >
+            <LogOut className="h-4 w-4" strokeWidth={1.75} />
             Se déconnecter
           </button>
         </form>

@@ -3,6 +3,7 @@ import type { CommandeRepository } from "../../domain/repositories/CommandeRepos
 import type { AlerteRepository } from "../../domain/repositories/AlerteRepository";
 import type { ProduitRepository } from "../../domain/repositories/ProduitRepository";
 import type { MouvementStockRepository } from "../../domain/repositories/MouvementStockRepository";
+import { directionMouvementPourTypeCommande } from "../../domain/services/directionMouvementCommande";
 import { enregistrerMouvement } from "../stock/enregistrerMouvement";
 
 export class CommandeReceptionnableSeulementDepuisValideeError extends Error {
@@ -23,12 +24,18 @@ export async function receptionnerCommande(
     throw new CommandeReceptionnableSeulementDepuisValideeError();
   }
 
+  const type = directionMouvementPourTypeCommande(commandeActuelle.type);
+  const motif =
+    commandeActuelle.type === "ACHAT_FOURNISSEUR"
+      ? `Réception commande ${commandeActuelle.id}`
+      : `Vente commande ${commandeActuelle.id}`;
+
   for (const ligne of commandeActuelle.lignes) {
     await enregistrerMouvement(mouvementRepository, alerteRepository, produitRepository, {
       produitId: ligne.produitId,
-      type: "ENTREE",
+      type,
       quantite: ligne.quantite,
-      motif: `Réception commande ${commandeActuelle.id}`,
+      motif,
     });
   }
 

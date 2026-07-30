@@ -2,8 +2,12 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { LogIn } from "lucide-react";
 
 import { loginAction, type LoginState } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../_components/ui/champClasses";
 
 const initialState: LoginState = {
   message: undefined,
@@ -14,65 +18,70 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginAction, initialState);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#fafafa,#e4e4e7)] px-4 py-12 text-zinc-900 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md items-center">
-        <section className="w-full rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_25px_60px_rgba(0,0,0,0.08)]">
-          <div className="mb-6">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-zinc-500">Vantik</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Connexion</h1>
-            <p className="mt-2 text-sm leading-6 text-zinc-600">
+    <main className="grid min-h-screen lg:grid-cols-2">
+      <section className="hidden flex-col justify-between bg-[var(--color-primary)] p-12 text-[var(--color-primary-foreground)] lg:flex">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] opacity-70">Vantik</p>
+          <h1 className="mt-6 max-w-sm font-heading text-4xl font-semibold leading-tight">
+            La gestion de votre entreprise, en un seul endroit.
+          </h1>
+        </div>
+        <p className="max-w-sm text-sm leading-6 opacity-70">
+          Stock, fournisseurs, commandes et alertes, pilotés au quotidien pour chaque entreprise connectée.
+        </p>
+      </section>
+
+      <section className="flex items-center justify-center bg-white px-6 py-12 sm:px-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-400 lg:hidden">Vantik</p>
+            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-stone-900">Connexion</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
               Connectez-vous pour accéder à votre espace entreprise.
             </p>
           </div>
 
           <form action={formAction} className="grid gap-4">
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Email</span>
+              <span className="text-sm font-medium text-stone-700">Email</span>
               <input
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
+                className={champClasses}
                 placeholder="vous@entreprise.com"
               />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Mot de passe</span>
+              <span className="text-sm font-medium text-stone-700">Mot de passe</span>
               <input
                 name="motDePasse"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
+                className={champClasses}
                 placeholder="Votre mot de passe"
               />
             </label>
 
-            {state.message ? (
-              <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-                {state.message}
-              </p>
-            ) : null}
+            <MessageFormulaire message={state.message} success={state.success} />
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Bouton type="submit" disabled={isPending} className="mt-2">
+              <LogIn className="h-4 w-4" strokeWidth={1.75} />
               {isPending ? "Connexion..." : "Se connecter"}
-            </button>
+            </Bouton>
           </form>
 
-          <p className="mt-6 text-sm text-zinc-600">
+          <p className="mt-6 text-sm text-stone-600">
             Pas encore de compte ?{" "}
-            <Link className="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4" href="/signup">
+            <Link className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4" href="/signup">
               Créer un compte
             </Link>
           </p>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }

@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowLeft, History } from "lucide-react";
 
 import { getUtilisateurConnecte } from "../../../../../infrastructure/auth/getUtilisateurConnecte";
 import { PrismaMouvementStockRepository } from "../../../../../infrastructure/repositories/PrismaMouvementStockRepository";
@@ -6,6 +8,12 @@ import { PrismaProduitRepository } from "../../../../../infrastructure/repositor
 import { listerMouvementsProduit } from "../../../../../application/stock/listerMouvementsProduit";
 import { enregistrerMouvementAction } from "./actions";
 import { MouvementStockForm } from "./MouvementStockForm";
+import { PageHeader } from "../../../../_components/ui/PageHeader";
+import { Panel } from "../../../../_components/ui/Panel";
+import { EmptyState } from "../../../../_components/ui/EmptyState";
+import { Badge } from "../../../../_components/ui/Badge";
+import { boutonClasses } from "../../../../_components/ui/boutonClasses";
+import { LIBELLE_TYPE_MOUVEMENT } from "../../../../_lib/libellesStatuts";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -38,33 +46,33 @@ export default async function MouvementsProduitPage({ params }: PageProps) {
   const mouvements = await listerMouvementsProduit(mouvementRepository, produitId);
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-10 text-zinc-900 sm:px-6 lg:px-8">
+    <main className="px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-        <header className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500">Vantik</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Mouvement de stock</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-            Produit: <span className="font-medium text-zinc-900">{produit.nom}</span>. Stock actuel: {produit.quantiteStock}. Seuil d'alerte: {produit.seuilAlerte}.
-          </p>
-        </header>
+        <PageHeader
+          title="Mouvement de stock"
+          description={`Produit : ${produit.nom}. Stock actuel : ${produit.quantiteStock}. Seuil d'alerte : ${produit.seuilAlerte}.`}
+          actions={
+            <Link href="/produits" className={boutonClasses("discret")}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+              Retour aux produits
+            </Link>
+          }
+        />
 
         <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
           <MouvementStockForm produitId={produitId} action={enregistrerMouvementAction} />
 
-          <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-zinc-900">Historique des mouvements</h2>
-              <p className="mt-1 text-sm text-zinc-500">{mouvements.length} mouvement(s) enregistré(s).</p>
-            </div>
-
+          <Panel title="Historique des mouvements" description={`${mouvements.length} mouvement(s) enregistré(s).`}>
             {mouvements.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-zinc-300 px-4 py-8 text-sm text-zinc-500">
-                Aucun mouvement pour ce produit pour le moment.
-              </p>
+              <EmptyState
+                icon={History}
+                title="Aucun mouvement pour le moment"
+                description="Enregistre une entrée, une sortie ou un ajustement avec le formulaire à gauche."
+              />
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-zinc-200">
-                <table className="min-w-full divide-y divide-zinc-200 text-left text-sm">
-                  <thead className="bg-zinc-50 text-zinc-500">
+              <div className="overflow-hidden rounded-lg border border-stone-200">
+                <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
+                  <thead className="bg-stone-50 text-stone-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">Date</th>
                       <th className="px-4 py-3 font-medium">Type</th>
@@ -72,20 +80,26 @@ export default async function MouvementsProduitPage({ params }: PageProps) {
                       <th className="px-4 py-3 font-medium">Motif</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 bg-white">
-                    {mouvements.map((mouvement) => (
-                      <tr key={mouvement.id}>
-                        <td className="px-4 py-3 text-zinc-700">{formaterDate(mouvement.date)}</td>
-                        <td className="px-4 py-3 text-zinc-900">{mouvement.type}</td>
-                        <td className="px-4 py-3 text-zinc-700">{mouvement.quantite}</td>
-                        <td className="px-4 py-3 text-zinc-700">{mouvement.motif ?? "—"}</td>
-                      </tr>
-                    ))}
+                  <tbody className="divide-y divide-stone-100 bg-white">
+                    {mouvements.map((mouvement) => {
+                      const libelle = LIBELLE_TYPE_MOUVEMENT[mouvement.type];
+
+                      return (
+                        <tr key={mouvement.id}>
+                          <td className="px-4 py-3 text-stone-700">{formaterDate(mouvement.date)}</td>
+                          <td className="px-4 py-3">
+                            {libelle ? <Badge variante={libelle.variante}>{libelle.label}</Badge> : mouvement.type}
+                          </td>
+                          <td className="px-4 py-3 text-stone-700">{mouvement.quantite}</td>
+                          <td className="px-4 py-3 text-stone-700">{mouvement.motif ?? "—"}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
-          </section>
+          </Panel>
         </div>
       </div>
     </main>

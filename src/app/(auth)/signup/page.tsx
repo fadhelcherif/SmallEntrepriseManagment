@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { AlertTriangle, UserPlus } from "lucide-react";
 
 import { signupAction, type SignupState } from "./actions";
+import { Bouton } from "../../_components/ui/Bouton";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
+import { champClasses } from "../../_components/ui/champClasses";
 
 const initialState: SignupState = {
   message: undefined,
@@ -14,129 +18,111 @@ export default function SignupPage() {
   const [state, formAction, isPending] = useActionState(signupAction, initialState);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#fafafa,#e4e4e7)] px-4 py-12 text-zinc-900 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md items-center">
-        <section className="w-full rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_25px_60px_rgba(0,0,0,0.08)]">
-          <div className="mb-6">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-zinc-500">Vantik</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Créer un compte</h1>
-            <p className="mt-2 text-sm leading-6 text-zinc-600">
+    <main className="grid min-h-screen lg:grid-cols-2">
+      <section className="hidden flex-col justify-between bg-[var(--color-primary)] p-12 text-[var(--color-primary-foreground)] lg:flex">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] opacity-70">Vantik</p>
+          <h1 className="mt-6 max-w-sm font-heading text-4xl font-semibold leading-tight">
+            Créez l’espace de votre entreprise en quelques minutes.
+          </h1>
+        </div>
+        <p className="max-w-sm text-sm leading-6 opacity-70">
+          Un espace isolé pour votre entreprise, votre catalogue et votre équipe, avec un premier compte administrateur.
+        </p>
+      </section>
+
+      <section className="flex items-center justify-center overflow-y-auto bg-white px-6 py-12 sm:px-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-400 lg:hidden">Vantik</p>
+            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-stone-900">Créer un compte</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
               Créez votre entreprise et son premier administrateur en une seule inscription.
             </p>
           </div>
 
           <form action={formAction} className="grid gap-4">
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Nom de l'entreprise</span>
-              <input
-                name="nomEntreprise"
-                type="text"
-                required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
-                placeholder="Ex: Atelier Dumas"
-              />
+              <span className="text-sm font-medium text-stone-700">Nom de l’entreprise</span>
+              <input name="nomEntreprise" type="text" required className={champClasses} placeholder="Ex: Atelier Dumas" />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Adresse</span>
-              <input
-                name="adresseEntreprise"
-                type="text"
-                required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
-                placeholder="Adresse complète"
-              />
+              <span className="text-sm font-medium text-stone-700">Adresse</span>
+              <input name="adresseEntreprise" type="text" required className={champClasses} placeholder="Adresse complète" />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Devise</span>
-              <input
-                name="deviseEntreprise"
-                type="text"
-                required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
-                placeholder="Ex: EUR"
-              />
+              <span className="text-sm font-medium text-stone-700">Devise</span>
+              <input name="deviseEntreprise" type="text" required className={champClasses} placeholder="Ex: EUR" />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-zinc-700">Type de métier</span>
-              <input
-                name="typeMetierEntreprise"
-                type="text"
-                required
-                className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
-                placeholder="Ex: Restauration"
-              />
+              <span className="text-sm font-medium text-stone-700">Type de métier</span>
+              <input name="typeMetierEntreprise" type="text" required className={champClasses} placeholder="Ex: Restauration" />
             </label>
 
-            <div className="mt-2 border-t border-zinc-200 pt-4">
-              <p className="mb-3 text-sm font-medium text-zinc-700">Administrateur principal</p>
+            <div className="mt-2 border-t border-stone-200 pt-4">
+              <p className="mb-3 text-sm font-medium text-stone-700">Administrateur principal</p>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-zinc-700">Nom</span>
+                <span className="text-sm font-medium text-stone-700">Nom</span>
                 <input
                   name="nomAdministrateur"
                   type="text"
                   autoComplete="name"
                   required
-                  className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
+                  className={champClasses}
                   placeholder="Votre nom"
                 />
               </label>
 
               <label className="mt-4 grid gap-2">
-                <span className="text-sm font-medium text-zinc-700">Email</span>
+                <span className="text-sm font-medium text-stone-700">Email</span>
                 <input
                   name="emailAdministrateur"
                   type="email"
                   autoComplete="email"
                   required
-                  className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
+                  className={champClasses}
                   placeholder="vous@entreprise.com"
                 />
               </label>
 
               <label className="mt-4 grid gap-2">
-                <span className="text-sm font-medium text-zinc-700">Mot de passe</span>
+                <span className="text-sm font-medium text-stone-700">Mot de passe</span>
                 <input
                   name="motDePasseAdministrateur"
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none transition focus:border-zinc-900"
+                  className={champClasses}
                   placeholder="Au moins 8 caractères"
                 />
               </label>
             </div>
 
-            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            <p className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
               Un compte créé ici est le premier administrateur de la nouvelle entreprise.
             </p>
 
-            {state.message ? (
-              <p className={`rounded-xl px-3 py-2 text-sm ${state.success ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
-                {state.message}
-              </p>
-            ) : null}
+            <MessageFormulaire message={state.message} success={state.success} />
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Bouton type="submit" disabled={isPending} className="mt-2">
+              <UserPlus className="h-4 w-4" strokeWidth={1.75} />
               {isPending ? "Création..." : "Créer l'entreprise"}
-            </button>
+            </Bouton>
           </form>
 
-          <p className="mt-6 text-sm text-zinc-600">
+          <p className="mt-6 text-sm text-stone-600">
             Déjà un compte ?{" "}
-            <Link className="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4" href="/login">
+            <Link className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4" href="/login">
               Se connecter
             </Link>
           </p>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }

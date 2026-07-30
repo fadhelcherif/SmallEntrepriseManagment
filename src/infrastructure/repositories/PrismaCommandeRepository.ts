@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { Prisma, TypeCommande as PrismaTypeCommande, StatutCommande as PrismaStatutCommande, type PrismaClient } from "@prisma/client";
 
 import type { Commande, StatutCommande, CommandeAEnregistrer } from "../../domain/entities/Commande";
 import type { CommandeRepository } from "../../domain/repositories/CommandeRepository";
@@ -10,8 +10,8 @@ function toCommande(commande: {
   id: string;
   entrepriseId: string;
   fournisseurId: string | null;
-  type: Prisma.TypeCommande;
-  statut: Prisma.StatutCommande;
+  type: PrismaTypeCommande;
+  statut: PrismaStatutCommande;
   dateCommande: Date;
   lignesCommande: Array<{
     id: string;
@@ -24,7 +24,7 @@ function toCommande(commande: {
   return {
     id: commande.id,
     entrepriseId: commande.entrepriseId,
-    fournisseurId: commande.fournisseurId ?? "",
+    fournisseurId: commande.fournisseurId,
     type: commande.type,
     statut: commande.statut,
     dateCommande: commande.dateCommande,
@@ -41,8 +41,8 @@ function toCommande(commande: {
 export class PrismaCommandeRepository implements CommandeRepository {
   constructor(private readonly client: PrismaClientLike = defaultPrisma) {}
 
-  private estPrismaClient(): this is { client: PrismaClient } {
-    return typeof (this.client as PrismaClient).$transaction === "function";
+  private estPrismaClient(client: PrismaClientLike): client is PrismaClient {
+    return typeof (client as PrismaClient).$transaction === "function";
   }
 
   async creer(donnees: CommandeAEnregistrer, entrepriseId: string): Promise<Commande> {
@@ -51,8 +51,8 @@ export class PrismaCommandeRepository implements CommandeRepository {
         data: {
           entrepriseId,
           utilisateurId: donnees.utilisateurId,
-          fournisseurId: donnees.fournisseurId,
-          type: "ACHAT_FOURNISSEUR",
+          fournisseurId: donnees.type === "ACHAT_FOURNISSEUR" ? donnees.fournisseurId : null,
+          type: donnees.type,
           statut: "BROUILLON",
           lignesCommande: {
             create: donnees.lignes.map((ligne) => ({
@@ -68,7 +68,7 @@ export class PrismaCommandeRepository implements CommandeRepository {
       return toCommande(commande);
     };
 
-    if (this.estPrismaClient()) {
+    if (this.estPrismaClient(this.client)) {
       return this.client.$transaction(async (transactionClient) => creerCommandeAvecLignes(transactionClient));
     }
 

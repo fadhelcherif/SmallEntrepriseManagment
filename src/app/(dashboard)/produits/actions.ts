@@ -33,12 +33,14 @@ export async function creerProduitAction(
   formData: FormData,
 ): Promise<CreerProduitState> {
   const nom = String(formData.get("nom") ?? "").trim();
-  const prixUnitaire = Number(formData.get("prixUnitaire"));
+  const prixAchat = Number(formData.get("prixAchat"));
+  const prixVente = Number(formData.get("prixVente"));
   const seuilAlerte = Number(formData.get("seuilAlerte"));
 
   const nouveauProduit: NouveauProduit = {
     nom,
-    prixUnitaire,
+    prixAchat,
+    prixVente,
     seuilAlerte,
   };
 
@@ -69,14 +71,16 @@ export async function modifierProduitAction(
   formData: FormData,
 ): Promise<void> {
   const nom = String(formData.get("nom") ?? "").trim();
-  const prixUnitaire = Number(formData.get("prixUnitaire"));
+  const prixAchat = Number(formData.get("prixAchat"));
+  const prixVente = Number(formData.get("prixVente"));
   const seuilAlerte = Number(formData.get("seuilAlerte"));
   const description = String(formData.get("description") ?? "").trim();
   const dateExpiration = parserDateExpiration(formData);
 
   const donnees: NouveauProduit = {
     nom,
-    prixUnitaire,
+    prixAchat,
+    prixVente,
     seuilAlerte,
     description: description.length > 0 ? description : undefined,
     dateExpiration,

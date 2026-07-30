@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowLeft, Check, ClipboardList, PackageCheck, XCircle } from "lucide-react";
 
 import { listerCommandes } from "../../../application/commandes/listerCommandes";
 import { listerFournisseurs } from "../../../application/fournisseurs/listerFournisseurs";
@@ -11,6 +12,14 @@ import { PrismaProduitRepository } from "../../../infrastructure/repositories/Pr
 import { ProduitForm } from "../produits/ProduitForm";
 import { creerProduitDepuisCommandeAction, creerCommandeAction, validerCommandeAction, annulerCommandeAction, receptionnerCommandeAction } from "./actions";
 import { CommandeForm } from "./CommandeForm";
+import { PageHeader } from "../../_components/ui/PageHeader";
+import { Panel } from "../../_components/ui/Panel";
+import { EmptyState } from "../../_components/ui/EmptyState";
+import { Badge } from "../../_components/ui/Badge";
+import { Bouton } from "../../_components/ui/Bouton";
+import { boutonClasses } from "../../_components/ui/boutonClasses";
+import { LIBELLE_STATUT_COMMANDE } from "../../_lib/libellesStatuts";
+import { calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
 
 const commandeRepository = new PrismaCommandeRepository();
 const fournisseurRepository = new PrismaFournisseurRepository();
@@ -33,25 +42,20 @@ export default async function CommandesFournisseursPage() {
   const produitsParId = new Map(produits.map((produit) => [produit.id, produit.nom]));
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-10 text-zinc-900 sm:px-6 lg:px-8">
+    <main className="px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <header className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500">Vantik</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">Commandes fournisseurs</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-                Création des achats, validation, réception et annulation des commandes fournisseurs.
-              </p>
-            </div>
-
-            <Link href="/fournisseurs" className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900">
+        <PageHeader
+          title="Commandes fournisseurs"
+          description="Création des achats, validation, réception et annulation des commandes fournisseurs."
+          actions={
+            <Link href="/fournisseurs" className={boutonClasses("discret")}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
               Voir les fournisseurs
             </Link>
-          </div>
-        </header>
+          }
+        />
 
-        <div className="grid gap-8 xl:grid-cols-[360px_360px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-2">
           <ProduitForm entrepriseId={utilisateurConnecte.entrepriseId} action={creerProduitDepuisCommandeAction} />
 
           <CommandeForm
@@ -61,76 +65,102 @@ export default async function CommandesFournisseursPage() {
             produits={produits}
             action={creerCommandeAction}
           />
+        </div>
 
-          <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-zinc-900">Commandes enregistrées</h2>
-                <p className="mt-1 text-sm text-zinc-500">{commandes.length} commande(s) trouvée(s).</p>
-              </div>
-            </div>
+        <Panel title="Commandes enregistrées" description={`${commandes.length} commande(s) trouvée(s).`}>
+          {commandes.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title="Aucune commande pour le moment"
+              description="Crée ta première commande fournisseur avec l'un des formulaires ci-dessus."
+            />
+          ) : (
+            <div className="space-y-4">
+              {commandes.map((commande) => {
+                const libelle = LIBELLE_STATUT_COMMANDE[commande.statut];
+                const montantTotal = calculerMontantTotalCommande(commande.lignes);
 
-            {commandes.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-zinc-300 px-4 py-8 text-sm text-zinc-500">Aucune commande fournisseur pour le moment.</p>
-            ) : (
-              <div className="space-y-4">
-                {commandes.map((commande) => (
-                  <article key={commande.id} className="rounded-2xl border border-zinc-200 p-4">
+                return (
+                  <article key={commande.id} className="rounded-lg border border-stone-200 p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <p className="text-sm font-medium text-zinc-900">Fournisseur: {fournisseursParId.get(commande.fournisseurId) ?? commande.fournisseurId}</p>
-                        <p className="mt-1 text-xs text-zinc-500">Statut: {commande.statut} - {commande.dateCommande.toLocaleDateString("fr-FR")}</p>
+                        <p className="text-sm font-medium text-stone-900">
+                          Fournisseur : {(commande.fournisseurId && fournisseursParId.get(commande.fournisseurId)) ?? commande.fournisseurId}
+                        </p>
+                        <div className="mt-1.5 flex items-center gap-2 text-xs text-stone-500">
+                          {libelle ? <Badge variante={libelle.variante}>{libelle.label}</Badge> : commande.statut}
+                          <span>{commande.dateCommande.toLocaleDateString("fr-FR")}</span>
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {commande.statut === "BROUILLON" ? (
                           <form action={validerCommandeAction.bind(null, utilisateurConnecte.entrepriseId)}>
                             <input type="hidden" name="commandeJson" value={JSON.stringify(commande)} />
-                            <button type="submit" className="rounded-xl bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-700">Valider</button>
+                            <Bouton type="submit">
+                              <Check className="h-3.5 w-3.5" strokeWidth={1.75} />
+                              Valider
+                            </Bouton>
                           </form>
                         ) : null}
 
                         {commande.statut === "VALIDEE" ? (
                           <form action={receptionnerCommandeAction.bind(null, utilisateurConnecte.entrepriseId)}>
                             <input type="hidden" name="commandeJson" value={JSON.stringify(commande)} />
-                            <button type="submit" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">Réceptionner</button>
+                            <Bouton type="submit" variante="succes">
+                              <PackageCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
+                              Réceptionner
+                            </Bouton>
                           </form>
                         ) : null}
 
                         {commande.statut === "BROUILLON" || commande.statut === "VALIDEE" ? (
                           <form action={annulerCommandeAction.bind(null, utilisateurConnecte.entrepriseId)}>
                             <input type="hidden" name="commandeJson" value={JSON.stringify(commande)} />
-                            <button type="submit" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100">Annuler</button>
+                            <Bouton type="submit" variante="danger">
+                              <XCircle className="h-3.5 w-3.5" strokeWidth={1.75} />
+                              Annuler
+                            </Bouton>
                           </form>
                         ) : null}
                       </div>
                     </div>
 
-                    <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200">
-                      <table className="min-w-full divide-y divide-zinc-200 text-left text-sm">
-                        <thead className="bg-zinc-50 text-zinc-500">
+                    <div className="mt-4 overflow-hidden rounded-md border border-stone-200">
+                      <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
+                        <thead className="bg-stone-50 text-stone-500">
                           <tr>
                             <th className="px-3 py-2 font-medium">Produit</th>
-                            <th className="px-3 py-2 font-medium">Quantité</th>
-                            <th className="px-3 py-2 font-medium">Prix appliqué</th>
+                            <th className="px-3 py-2 text-right font-medium">Quantité</th>
+                            <th className="px-3 py-2 text-right font-medium">Prix appliqué</th>
+                            <th className="px-3 py-2 text-right font-medium">Sous-total</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-100 bg-white">
+                        <tbody className="divide-y divide-stone-100 bg-white">
                           {commande.lignes.map((ligne) => (
                             <tr key={ligne.id}>
-                              <td className="px-3 py-2 text-zinc-700">{produitsParId.get(ligne.produitId) ?? ligne.produitId}</td>
-                              <td className="px-3 py-2 text-zinc-700">{ligne.quantite}</td>
-                              <td className="px-3 py-2 text-zinc-700">{ligne.prixApplique.toFixed(2)}</td>
+                              <td className="px-3 py-2 text-stone-700">{produitsParId.get(ligne.produitId) ?? ligne.produitId}</td>
+                              <td className="px-3 py-2 text-right text-stone-700">{ligne.quantite}</td>
+                              <td className="px-3 py-2 text-right text-stone-700">{ligne.prixApplique.toFixed(2)}</td>
+                              <td className="px-3 py-2 text-right text-stone-700">{(ligne.quantite * ligne.prixApplique).toFixed(2)}</td>
                             </tr>
                           ))}
                         </tbody>
+                        <tfoot>
+                          <tr className="border-t border-stone-200 bg-stone-50">
+                            <td colSpan={3} className="px-3 py-2 text-right text-sm font-medium text-stone-700">
+                              Total commande
+                            </td>
+                            <td className="px-3 py-2 text-right font-heading font-semibold text-stone-900">{montantTotal.toFixed(2)}</td>
+                          </tr>
+                        </tfoot>
                       </table>
                     </div>
                   </article>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </Panel>
       </div>
     </main>
   );
