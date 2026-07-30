@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 import type { Utilisateur } from "../../domain/entities/Utilisateur";
 
-export type SessionUtilisateur = Pick<Utilisateur, "id" | "entrepriseId" | "role">;
+export type SessionUtilisateur = Pick<Utilisateur, "id" | "entrepriseId" | "role" | "nom">;
 
 const SESSION_COOKIE_NAME = "session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
@@ -24,6 +24,7 @@ export async function creerSession(utilisateur: SessionUtilisateur): Promise<voi
     userId: utilisateur.id,
     entrepriseId: utilisateur.entrepriseId,
     role: utilisateur.role,
+    nom: utilisateur.nom,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -55,8 +56,14 @@ export async function lireSession(): Promise<SessionUtilisateur | null> {
     const userId = payload.userId;
     const entrepriseId = payload.entrepriseId;
     const role = payload.role;
+    const nom = payload.nom;
 
-    if (typeof userId !== "string" || typeof entrepriseId !== "string" || (role !== "ADMINISTRATEUR" && role !== "EMPLOYE")) {
+    if (
+      typeof userId !== "string" ||
+      typeof entrepriseId !== "string" ||
+      typeof nom !== "string" ||
+      (role !== "ADMINISTRATEUR" && role !== "EMPLOYE")
+    ) {
       return null;
     }
 
@@ -64,6 +71,7 @@ export async function lireSession(): Promise<SessionUtilisateur | null> {
       id: userId,
       entrepriseId,
       role,
+      nom,
     };
   } catch {
     return null;

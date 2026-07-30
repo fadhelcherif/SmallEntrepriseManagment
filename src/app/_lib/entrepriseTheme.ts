@@ -27,6 +27,10 @@ function hexVersRgb(hex: string): [number, number, number] | null {
   ];
 }
 
+function estHexValide(valeur: string): boolean {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(valeur.trim());
+}
+
 export function texteLisibleSur(couleurFond: string): string {
   const rgb = hexVersRgb(couleurFond);
 
@@ -41,13 +45,18 @@ export function texteLisibleSur(couleurFond: string): string {
 }
 
 export function variablesThemeEntreprise(entreprise?: EntrepriseCouleurs | null): Record<string, string> {
-  const primaire = entreprise?.couleurPrimaire?.trim() || COULEUR_PRIMAIRE_PAR_DEFAUT;
-  const secondaire = entreprise?.couleurSecondaire?.trim() || COULEUR_SECONDAIRE_PAR_DEFAUT;
+  const couleurPrimaireBrute = entreprise?.couleurPrimaire?.trim();
+  const couleurSecondaireBrute = entreprise?.couleurSecondaire?.trim();
+
+  const primaire = couleurPrimaireBrute && estHexValide(couleurPrimaireBrute) ? couleurPrimaireBrute : COULEUR_PRIMAIRE_PAR_DEFAUT;
+  const secondaire =
+    couleurSecondaireBrute && estHexValide(couleurSecondaireBrute) ? couleurSecondaireBrute : COULEUR_SECONDAIRE_PAR_DEFAUT;
 
   return {
     "--color-primary": primaire,
     "--color-primary-foreground": texteLisibleSur(primaire),
     "--color-secondary": secondaire,
     "--color-secondary-foreground": texteLisibleSur(secondaire),
+    "--color-surface": `color-mix(in srgb, ${primaire} 7%, #fafaf9)`,
   };
 }

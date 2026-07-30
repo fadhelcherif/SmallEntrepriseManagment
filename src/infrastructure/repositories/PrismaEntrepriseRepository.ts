@@ -12,6 +12,10 @@ function toEntreprise(entreprise: {
   adresse: string;
   devise: string;
   typeMetier: string;
+  categorie: string | null;
+  logo: string | null;
+  couleurPrimaire: string | null;
+  couleurSecondaire: string | null;
 }): Entreprise {
   return {
     id: entreprise.id,
@@ -19,6 +23,10 @@ function toEntreprise(entreprise: {
     adresse: entreprise.adresse,
     devise: entreprise.devise,
     typeMetier: entreprise.typeMetier,
+    categorie: entreprise.categorie,
+    logo: entreprise.logo,
+    couleurPrimaire: entreprise.couleurPrimaire,
+    couleurSecondaire: entreprise.couleurSecondaire,
   };
 }
 
@@ -39,5 +47,23 @@ export class PrismaEntrepriseRepository implements EntrepriseRepository {
     });
 
     return entreprise ? toEntreprise(entreprise) : null;
+  }
+
+  async modifier(id: string, donnees: Partial<NouvelleEntreprise>): Promise<Entreprise> {
+    const entreprise = await this.client.entreprise.update({
+      where: { id },
+      data: {
+        ...(donnees.nom !== undefined ? { nom: donnees.nom } : {}),
+        ...(donnees.adresse !== undefined ? { adresse: donnees.adresse } : {}),
+        ...(donnees.devise !== undefined ? { devise: donnees.devise } : {}),
+        ...(donnees.typeMetier !== undefined ? { typeMetier: donnees.typeMetier } : {}),
+        ...(donnees.categorie !== undefined ? { categorie: donnees.categorie } : {}),
+        ...(donnees.logo !== undefined ? { logo: donnees.logo } : {}),
+        ...(donnees.couleurPrimaire !== undefined ? { couleurPrimaire: donnees.couleurPrimaire } : {}),
+        ...(donnees.couleurSecondaire !== undefined ? { couleurSecondaire: donnees.couleurSecondaire } : {}),
+      },
+    });
+
+    return toEntreprise(entreprise);
   }
 }

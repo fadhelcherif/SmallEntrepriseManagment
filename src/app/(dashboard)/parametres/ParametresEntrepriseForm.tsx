@@ -1,15 +1,17 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Save } from "lucide-react";
+import { useActionState, useState, type ChangeEvent } from "react";
+import { Image as ImageIcon, Save, Upload } from "lucide-react";
 
 import type { Entreprise } from "../../../domain/entities/Entreprise";
 import type { ParametresEntrepriseState } from "./actions";
 import { Bouton } from "../../_components/ui/Bouton";
+import { boutonClasses } from "../../_components/ui/boutonClasses";
 import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
 import { champClasses } from "../../_components/ui/champClasses";
 import { Panel } from "../../_components/ui/Panel";
 import { texteLisibleSur } from "../../_lib/entrepriseTheme";
+import { traiterLogoDepuisFichier } from "../../_lib/extraireCouleursLogo";
 
 type ParametresEntrepriseFormProps = {
   entreprise: Entreprise;
@@ -32,9 +34,41 @@ export function ParametresEntrepriseForm({ entreprise, action }: ParametresEntre
   const [state, formAction, isPending] = useActionState(action, initialState);
   const [couleurPrimaire, setCouleurPrimaire] = useState(entreprise.couleurPrimaire ?? "");
   const [couleurSecondaire, setCouleurSecondaire] = useState(entreprise.couleurSecondaire ?? "");
+  const [logo, setLogo] = useState(entreprise.logo ?? "");
+  const [traitementLogoEnCours, setTraitementLogoEnCours] = useState(false);
+  const [messageLogo, setMessageLogo] = useState<string | null>(null);
 
   const primaireApercu = estHexValide(couleurPrimaire) ? couleurPrimaire : COULEUR_PRIMAIRE_PAR_DEFAUT;
   const secondaireApercu = estHexValide(couleurSecondaire) ? couleurSecondaire : COULEUR_SECONDAIRE_PAR_DEFAUT;
+
+  async function surChangementLogo(event: ChangeEvent<HTMLInputElement>) {
+    const fichier = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!fichier) {
+      return;
+    }
+
+    setTraitementLogoEnCours(true);
+    setMessageLogo(null);
+
+    try {
+      const { logoDataUrl, palette } = await traiterLogoDepuisFichier(fichier);
+      setLogo(logoDataUrl);
+
+      if (palette) {
+        setCouleurPrimaire(palette.primaire);
+        setCouleurSecondaire(palette.secondaire);
+        setMessageLogo("Couleurs primaire et secondaire détectées automatiquement à partir du logo.");
+      } else {
+        setMessageLogo("Logo importé. Aucune couleur distincte détectée : ajuste-les manuellement ci-dessous.");
+      }
+    } catch {
+      setMessageLogo("Impossible de traiter cette image. Réessaie avec un autre fichier.");
+    } finally {
+      setTraitementLogoEnCours(false);
+    }
+  }
 
   return (
     <Panel title="Paramètres de l'entreprise" description="Les changements sont réservés aux administrateurs.">
@@ -64,10 +98,44 @@ export function ParametresEntrepriseForm({ entreprise, action }: ParametresEntre
           <input name="categorie" type="text" defaultValue={entreprise.categorie ?? ""} className={champClasses} />
         </label>
 
-        <label className="grid gap-2">
+        <div className="grid gap-2">
           <span className="text-sm font-medium text-stone-700">Logo</span>
-          <input name="logo" type="text" defaultValue={entreprise.logo ?? ""} className={champClasses} />
-        </label>
+          <input type="hidden" name="logo" value={logo} />
+
+          <div className="flex items-center gap-3">
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logo}
+                alt="Logo de l'entreprise"
+                className="h-14 w-14 shrink-0 rounded-md border border-stone-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-stone-300 text-stone-300">
+                <ImageIcon className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+            )}
+
+            <label
+              className={boutonClasses(
+                "discret",
+                `cursor-pointer ${traitementLogoEnCours ? "pointer-events-none opacity-60" : ""}`,
+              )}
+            >
+              <Upload className="h-4 w-4" strokeWidth={1.75} />
+              {traitementLogoEnCours ? "Analyse..." : "Choisir un logo"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={surChangementLogo}
+                disabled={traitementLogoEnCours}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {messageLogo ? <p className="text-xs text-stone-500">{messageLogo}</p> : null}
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-2">
@@ -78,7 +146,7 @@ export function ParametresEntrepriseForm({ entreprise, action }: ParametresEntre
                 value={primaireApercu}
                 onChange={(event) => setCouleurPrimaire(event.target.value)}
                 aria-label="Sélecteur de couleur primaire"
-                className="h-[42px] w-12 shrink-0 cursor-pointer rounded-md border border-stone-300 bg-white p-1"
+                className="h-10.5 w-12 shrink-0 cursor-pointer rounded-md border border-stone-300 bg-white p-1"
               />
               <input
                 name="couleurPrimaire"
@@ -99,7 +167,7 @@ export function ParametresEntrepriseForm({ entreprise, action }: ParametresEntre
                 value={secondaireApercu}
                 onChange={(event) => setCouleurSecondaire(event.target.value)}
                 aria-label="Sélecteur de couleur secondaire"
-                className="h-[42px] w-12 shrink-0 cursor-pointer rounded-md border border-stone-300 bg-white p-1"
+                className="h-10.5 w-12 shrink-0 cursor-pointer rounded-md border border-stone-300 bg-white p-1"
               />
               <input
                 name="couleurSecondaire"
