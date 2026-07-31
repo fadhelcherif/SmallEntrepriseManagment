@@ -21,7 +21,10 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 - ✅ Protection des routes (dashboard) via middleware
 - ✅ Ajouter un utilisateur EMPLOYE a une entreprise existante (admin
   seulement) — page /utilisateurs, liste des membres + creation
-- ⬜ Modifier/desactiver un utilisateur existant
+- ✅ Modifier/desactiver un utilisateur existant — modale d'edition sur
+  /utilisateurs (nom, email, role, actif). Un administrateur ne peut pas
+  changer son propre role ou statut, et ne peut modifier que les
+  utilisateurs de sa propre entreprise.
 - ⬜ Reinitialisation de mot de passe
 
 ## Entreprise
@@ -92,6 +95,7 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Prochaine etape recommandee
 
-Modifier/desactiver un utilisateur existant (suite logique de l'ajout
-d'utilisateur), ou Charges de l'entreprise (module Finance, pas encore
-commence).
+Filtre par date + totaux journaliers/periode sur commandes fournisseurs et
+commandes clients (demande explicitement par l'utilisateur), ou
+Reinitialisation de mot de passe pour clore entierement la section
+Authentification et comptes.
