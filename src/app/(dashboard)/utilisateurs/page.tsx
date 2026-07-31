@@ -6,6 +6,7 @@ import { getUtilisateurConnecte } from "../../../infrastructure/auth/getUtilisat
 import { PrismaUtilisateurRepository } from "../../../infrastructure/repositories/PrismaUtilisateurRepository";
 import { creerUtilisateurAction } from "./actions";
 import { UtilisateurForm } from "./UtilisateurForm";
+import { UtilisateurActions } from "./UtilisateurActions";
 import { PageHeader } from "../../_components/ui/PageHeader";
 import { Panel } from "../../_components/ui/Panel";
 import { EmptyState } from "../../_components/ui/EmptyState";
@@ -52,7 +53,8 @@ export default async function UtilisateursPage() {
                       <th className="px-4 py-3 font-medium">Nom</th>
                       <th className="px-4 py-3 font-medium">Email</th>
                       <th className="px-4 py-3 font-medium">Rôle</th>
-                      <th className="px-4 py-3 text-right font-medium">Statut</th>
+                      <th className="px-4 py-3 font-medium">Statut</th>
+                      <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 bg-white">
@@ -65,10 +67,17 @@ export default async function UtilisateursPage() {
                             {utilisateur.role === "ADMINISTRATEUR" ? "Administrateur" : "Employé"}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3">
                           <Badge variante={utilisateur.actif ? "succes" : "danger"}>
                             {utilisateur.actif ? "Actif" : "Inactif"}
                           </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {utilisateur.id === utilisateurConnecte.id ? (
+                            <span className="text-xs text-stone-400">Vous</span>
+                          ) : (
+                            <UtilisateurActions utilisateur={utilisateur} />
+                          )}
                         </td>
                       </tr>
                     ))}

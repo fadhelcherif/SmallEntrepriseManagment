@@ -5,7 +5,7 @@ import type {
   Utilisateur,
   UtilisateurAvecMotDePasse,
 } from "../../domain/entities/Utilisateur";
-import type { UtilisateurRepository } from "../../domain/repositories/UtilisateurRepository";
+import type { ModificationUtilisateur, UtilisateurRepository } from "../../domain/repositories/UtilisateurRepository";
 import { prisma as defaultPrisma } from "../db";
 
 type PrismaClientLike = PrismaClient | Prisma.TransactionClient;
@@ -80,5 +80,27 @@ export class PrismaUtilisateurRepository implements UtilisateurRepository {
     });
 
     return utilisateurs.map(toUtilisateur);
+  }
+
+  async trouverParId(id: string): Promise<Utilisateur | null> {
+    const utilisateur = await this.client.utilisateur.findUnique({
+      where: { id },
+    });
+
+    return utilisateur ? toUtilisateur(utilisateur) : null;
+  }
+
+  async modifier(id: string, donnees: ModificationUtilisateur): Promise<Utilisateur> {
+    const utilisateur = await this.client.utilisateur.update({
+      where: { id },
+      data: {
+        ...(donnees.nom !== undefined ? { nom: donnees.nom } : {}),
+        ...(donnees.email !== undefined ? { email: donnees.email } : {}),
+        ...(donnees.role !== undefined ? { role: donnees.role } : {}),
+        ...(donnees.actif !== undefined ? { actif: donnees.actif } : {}),
+      },
+    });
+
+    return toUtilisateur(utilisateur);
   }
 }
