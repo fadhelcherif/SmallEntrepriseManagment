@@ -62,7 +62,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
             <p className="mt-1 text-xs uppercase tracking-wide text-stone-500">{utilisateurConnecte.role}</p>
           </div>
 
-          <NavLinks afficherParametres={utilisateurConnecte.role === "ADMINISTRATEUR"} />
+          <NavLinks estAdministrateur={utilisateurConnecte.role === "ADMINISTRATEUR"} />
 
           <form action={deconnexionAction} className="mt-6 lg:mt-auto lg:pt-6">
             <button

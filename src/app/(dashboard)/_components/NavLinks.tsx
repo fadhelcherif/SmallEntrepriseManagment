@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Truck, ClipboardList, Receipt, BellRing, Settings, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Package, Truck, ClipboardList, Receipt, BellRing, Users, Settings, type LucideIcon } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -15,15 +15,18 @@ const ELEMENTS_NAVIGATION: NavItem[] = [
   { href: "/alertes", label: "Alertes", icon: BellRing },
 ];
 
+const ELEMENTS_NAVIGATION_ADMIN: NavItem[] = [
+  { href: "/utilisateurs", label: "Utilisateurs", icon: Users },
+  { href: "/parametres", label: "Paramètres", icon: Settings },
+];
+
 type NavLinksProps = {
-  afficherParametres: boolean;
+  estAdministrateur: boolean;
 };
 
-export function NavLinks({ afficherParametres }: NavLinksProps) {
+export function NavLinks({ estAdministrateur }: NavLinksProps) {
   const pathname = usePathname();
-  const elements = afficherParametres
-    ? [...ELEMENTS_NAVIGATION, { href: "/parametres", label: "Paramètres", icon: Settings }]
-    : ELEMENTS_NAVIGATION;
+  const elements = estAdministrateur ? [...ELEMENTS_NAVIGATION, ...ELEMENTS_NAVIGATION_ADMIN] : ELEMENTS_NAVIGATION;
 
   return (
     <nav className="flex flex-col gap-1 text-sm font-medium">

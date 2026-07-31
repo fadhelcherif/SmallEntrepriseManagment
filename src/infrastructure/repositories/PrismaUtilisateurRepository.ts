@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { Prisma, RoleUtilisateur as PrismaRoleUtilisateur, type PrismaClient } from "@prisma/client";
 
 import type {
   NouvelUtilisateurAvecMotDePasseHash,
@@ -16,7 +16,7 @@ function toUtilisateur(
     entrepriseId: string;
     nom: string;
     email: string;
-    role: Prisma.RoleUtilisateur;
+    role: PrismaRoleUtilisateur;
     actif: boolean;
   },
 ): Utilisateur {
@@ -36,7 +36,7 @@ function toUtilisateurAvecMotDePasse(
     entrepriseId: string;
     nom: string;
     email: string;
-    role: Prisma.RoleUtilisateur;
+    role: PrismaRoleUtilisateur;
     actif: boolean;
     motDePasseHash: string;
   },

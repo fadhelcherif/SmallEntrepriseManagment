@@ -19,8 +19,8 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 - ✅ Inscription (creer une entreprise + son premier administrateur)
 - ✅ Connexion / deconnexion, session par cookie JWT
 - ✅ Protection des routes (dashboard) via middleware
-- ⬜ Ajouter un utilisateur EMPLOYE a une entreprise existante (admin
-  seulement)
+- ✅ Ajouter un utilisateur EMPLOYE a une entreprise existante (admin
+  seulement) — page /utilisateurs, liste des membres + creation
 - ⬜ Modifier/desactiver un utilisateur existant
 - ⬜ Reinitialisation de mot de passe
 
@@ -40,6 +40,10 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
   d'utilisation — «extend»)
 - ⬜ Attributs personnalises par produit (le champ existe dans le schema,
   pas encore d'interface)
+- ⬜ Ecran "Stock" global avec l'historique de tous les mouvements de
+  l'entreprise, tous produits confondus (ENTREE / SORTIE / AJUSTEMENT) —
+  aujourd'hui l'historique n'existe qu'au niveau d'un produit
+  (/produits/[id]/mouvements), pas de vue d'ensemble transversale.
 
 ## Fournisseurs et achats
 
@@ -51,12 +55,16 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 - ℹ️ "Recevoir une commande" (cote fournisseur, dans le diagramme de cas
   d'utilisation) reste conceptuel en V1 — aucune notification reelle
   envoyee au fournisseur, juste le changement de statut cote Vantik.
+- ⬜ Filtre par date sur la page commandes fournisseurs, avec un total
+  journalier et le total des achats sur la periode filtree.
 
 ## Commandes clients
 
 - ✅ Ventes aux clients : creation, validation, livraison (SORTIE de stock)
   et annulation. Pas d'entite Client — une commande vente n'a pas de
   reference client (comme une caisse), uniquement des lignes produit.
+- ⬜ Filtre par date sur la page commandes clients, avec un total
+  journalier et le total des ventes sur la periode filtree.
 
 ## Finance
 
@@ -84,5 +92,6 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Prochaine etape recommandee
 
-Ajouter un utilisateur EMPLOYE a une entreprise existante (admin seulement),
-ou Charges de l'entreprise (module Finance, pas encore commence).
+Modifier/desactiver un utilisateur existant (suite logique de l'ajout
+d'utilisateur), ou Charges de l'entreprise (module Finance, pas encore
+commence).
