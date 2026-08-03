@@ -24,7 +24,6 @@ import { calculerMontantTotalCommande } from "../../domain/services/calculerMont
 import { calculerValeurStock } from "../../domain/services/calculerValeurStock";
 import { calculerVentesParProduit } from "../../domain/services/calculerVentesParProduit";
 import { Panel } from "../_components/ui/Panel";
-import { PageHeader } from "../_components/ui/PageHeader";
 import { StatCard } from "../_components/ui/StatCard";
 import { EmptyState } from "../_components/ui/EmptyState";
 import { GraphiqueDonut, type SegmentDonut } from "../_components/ui/GraphiqueDonut";
@@ -198,23 +197,7 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-        <PageHeader
-          eyebrow="Accueil"
-          title={`Bienvenue, ${utilisateurConnecte.nom}`}
-          description={`${entreprise.nom} — ${entreprise.typeMetier}`}
-          actions={
-            entreprise.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={entreprise.logo}
-                alt={entreprise.nom}
-                className="h-[5cm] w-[5cm] shrink-0 rounded-md border border-stone-200 bg-white object-contain p-2"
-              />
-            ) : undefined
-          }
-        />
-
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={Package} label="Produits" value={produits.length} hint="Références au catalogue" />
           <StatCard icon={Truck} label="Fournisseurs" value={fournisseurs.length} hint="Partenaires actifs" />

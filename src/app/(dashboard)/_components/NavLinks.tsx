@@ -31,7 +31,7 @@ export function NavLinks({ estAdministrateur }: NavLinksProps) {
   const elements = estAdministrateur ? [...ELEMENTS_NAVIGATION, ...ELEMENTS_NAVIGATION_ADMIN] : ELEMENTS_NAVIGATION;
 
   return (
-    <nav className="flex flex-col gap-1 text-sm font-medium">
+    <nav className="flex flex-col gap-1.5 text-[11px] font-semibold tracking-wide uppercase">
       {elements.map((element) => {
         const estActif = element.href === "/" ? pathname === "/" : pathname.startsWith(element.href);
         const Icon = element.icon;
@@ -40,13 +40,18 @@ export function NavLinks({ estAdministrateur }: NavLinksProps) {
           <Link
             key={element.href}
             href={element.href}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 transition ${
-              estActif
-                ? "bg-[var(--color-primary)] text-[var(--color-primary-foreground)]"
-                : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-            }`}
+            className={`flex items-center gap-3 px-1 py-1.5 transition ${estActif ? "text-white" : "text-stone-500 hover:text-stone-300"}`}
           >
-            <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition"
+              style={
+                estActif
+                  ? { backgroundColor: "var(--color-primary)", borderColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }
+                  : { borderColor: "#44403c" }
+              }
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+            </span>
             {element.label}
           </Link>
         );

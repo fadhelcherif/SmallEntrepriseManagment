@@ -84,7 +84,7 @@ export default async function FournisseursPage() {
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <PageHeader
           title="Fournisseurs"
           description="Gestion des fournisseurs liés à l'entreprise connectée."

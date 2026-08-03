@@ -29,7 +29,7 @@ export default async function UtilisateursPage() {
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <PageHeader
           title="Utilisateurs"
           description="Gestion des membres de l'équipe. Réservé aux administrateurs."

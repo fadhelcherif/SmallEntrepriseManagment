@@ -25,7 +25,18 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
   /utilisateurs (nom, email, role, actif). Un administrateur ne peut pas
   changer son propre role ou statut, et ne peut modifier que les
   utilisateurs de sa propre entreprise.
-- ⬜ Reinitialisation de mot de passe
+- ✅ Reinitialisation de mot de passe (self-service par email) :
+  - /mot-de-passe-oublie (email) → cree un TokenReinitialisationMotDePasse
+    (valable 1h, usage unique) et envoie un lien par email. Le message
+    affiche reste generique que le compte existe ou non (anti-enumeration).
+  - /reinitialiser-mot-de-passe?token=... : verifie le token (non
+    expire, non utilise), met a jour motDePasseHash, marque le token
+    utilise.
+  - Envoi d'email via Gmail SMTP (nodemailer), identifiants dans .env
+    (GMAIL_USER / GMAIL_APP_PASSWORD), lien construit avec APP_URL.
+    Couches : domain/services/EnvoyeurEmail.ts (interface) implementee
+    par infrastructure/email/EnvoyeurEmailGmail.ts — seul fichier du
+    projet qui touche ces identifiants.
 
 ## Entreprise
 
@@ -174,6 +185,7 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Prochaine etape recommandee
 
-Reinitialisation de mot de passe, pour clore entierement la section
-Authentification et comptes. Alternative : demarrer le module
-Intelligence artificielle (rien de commence dans cette section).
+La section Authentification et comptes est maintenant complete. Prochain
+chantier logique : le module Intelligence artificielle (rien de commence
+dans cette section), ou "Modeles par categorie d'entreprise" (plus petit,
+idee deja documentee mais jamais implementee).

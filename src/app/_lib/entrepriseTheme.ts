@@ -1,4 +1,4 @@
-const COULEUR_PRIMAIRE_PAR_DEFAUT = "#1c1917";
+const COULEUR_PRIMAIRE_PAR_DEFAUT = "#d64a3c";
 const COULEUR_SECONDAIRE_PAR_DEFAUT = "#f5f5f4";
 
 type EntrepriseCouleurs = {
@@ -57,6 +57,6 @@ export function variablesThemeEntreprise(entreprise?: EntrepriseCouleurs | null)
     "--color-primary-foreground": texteLisibleSur(primaire),
     "--color-secondary": secondaire,
     "--color-secondary-foreground": texteLisibleSur(secondaire),
-    "--color-surface": `color-mix(in srgb, ${primaire} 7%, #fafaf9)`,
+    "--color-surface": `color-mix(in srgb, ${primaire} 5%, #ececea)`,
   };
 }

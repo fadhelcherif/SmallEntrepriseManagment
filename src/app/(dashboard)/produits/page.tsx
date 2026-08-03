@@ -42,7 +42,7 @@ export default async function ProduitsPage() {
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <PageHeader
           title="Produits"
           description="Gestion du catalogue produits de l'entreprise. La page liste les produits existants et permet d'en créer un nouveau."

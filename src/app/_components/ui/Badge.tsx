@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export type VarianteBadge = "neutre" | "info" | "succes" | "avertissement" | "danger";
 
-const BASE = "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium whitespace-nowrap";
+const BASE = "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap";
 
 const STATIQUES: Record<Exclude<VarianteBadge, "info">, string> = {
   neutre: "border-stone-200 bg-stone-100 text-stone-700",

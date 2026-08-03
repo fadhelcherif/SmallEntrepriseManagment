@@ -2,20 +2,20 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { Mail } from "lucide-react";
 
-import { loginAction, type LoginState } from "./actions";
+import { demanderReinitialisationAction, type DemandeReinitialisationState } from "./actions";
 import { Bouton } from "../../_components/ui/Bouton";
 import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
 import { champClasses } from "../../_components/ui/champClasses";
 
-const initialState: LoginState = {
+const initialState: DemandeReinitialisationState = {
   message: undefined,
   success: false,
 };
 
-export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(loginAction, initialState);
+export default function MotDePasseOubliePage() {
+  const [state, formAction, isPending] = useActionState(demanderReinitialisationAction, initialState);
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
@@ -35,9 +35,9 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-400 lg:hidden">Vantik</p>
-            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-stone-900">Connexion</h2>
+            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-stone-900">Mot de passe oublié</h2>
             <p className="mt-2 text-sm leading-6 text-stone-600">
-              Connectez-vous pour accéder à votre espace entreprise.
+              Indiquez votre email, on vous envoie un lien pour choisir un nouveau mot de passe.
             </p>
           </div>
 
@@ -54,38 +54,17 @@ export default function LoginPage() {
               />
             </label>
 
-            <label className="grid gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-stone-700">Mot de passe</span>
-                <Link
-                  href="/mot-de-passe-oublie"
-                  className="text-xs font-medium text-stone-500 underline decoration-stone-300 underline-offset-4 hover:text-stone-900"
-                >
-                  Mot de passe oublié ?
-                </Link>
-              </div>
-              <input
-                name="motDePasse"
-                type="password"
-                autoComplete="current-password"
-                required
-                className={champClasses}
-                placeholder="Votre mot de passe"
-              />
-            </label>
-
             <MessageFormulaire message={state.message} success={state.success} />
 
             <Bouton type="submit" disabled={isPending} className="mt-2">
-              <LogIn className="h-4 w-4" strokeWidth={1.75} />
-              {isPending ? "Connexion..." : "Se connecter"}
+              <Mail className="h-4 w-4" strokeWidth={1.75} />
+              {isPending ? "Envoi..." : "Envoyer le lien"}
             </Bouton>
           </form>
 
           <p className="mt-6 text-sm text-stone-600">
-            Pas encore de compte ?{" "}
-            <Link className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4" href="/signup">
-              Créer un compte
+            <Link className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4" href="/login">
+              Retour à la connexion
             </Link>
           </p>
         </div>

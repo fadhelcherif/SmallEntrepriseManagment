@@ -69,14 +69,29 @@ model Utilisateur {
   salaire        Decimal?        @db.Decimal(12, 2)
   dateCreation   DateTime        @default(now())
 
-  entreprise      Entreprise       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
-  journalActions  JournalAction[]
-  mouvementsStock MouvementStock[]
-  commandes       Commande[]
-  charges         Charge[]
+  entreprise              Entreprise                        @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  journalActions          JournalAction[]
+  mouvementsStock         MouvementStock[]
+  commandes               Commande[]
+  charges                 Charge[]
+  tokensReinitialisation  TokenReinitialisationMotDePasse[]
 
   @@index([entrepriseId])
   @@map("utilisateurs")
+}
+
+model TokenReinitialisationMotDePasse {
+  id             String   @id @default(uuid())
+  utilisateurId  String
+  token          String   @unique
+  dateExpiration DateTime
+  utilise        Boolean  @default(false)
+  dateCreation   DateTime @default(now())
+
+  utilisateur Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+
+  @@index([utilisateurId])
+  @@map("tokens_reinitialisation_mot_de_passe")
 }
 
 model JournalAction {

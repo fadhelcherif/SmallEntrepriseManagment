@@ -58,7 +58,7 @@ export default async function ChargesPage() {
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <PageHeader
           title="Charges"
           description="Loyer, factures, emballage, salaires et autres charges de l'entreprise. Réservé aux administrateurs."

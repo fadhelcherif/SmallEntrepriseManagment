@@ -110,4 +110,11 @@ export class PrismaUtilisateurRepository implements UtilisateurRepository {
 
     return toUtilisateur(utilisateur);
   }
+
+  async modifierMotDePasse(id: string, motDePasseHash: string): Promise<void> {
+    await this.client.utilisateur.update({
+      where: { id },
+      data: { motDePasseHash },
+    });
+  }
 }

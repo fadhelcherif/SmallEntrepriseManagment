@@ -11,3 +11,10 @@ export class UtilisateurDejaExistantError extends Error {
     this.name = "UtilisateurDejaExistantError";
   }
 }
+
+export class TokenReinitialisationInvalideError extends Error {
+  constructor(message = "Ce lien de réinitialisation est invalide ou a expiré.") {
+    super(message);
+    this.name = "TokenReinitialisationInvalideError";
+  }
+}

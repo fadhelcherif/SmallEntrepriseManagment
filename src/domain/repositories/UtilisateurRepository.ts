@@ -12,4 +12,5 @@ export interface UtilisateurRepository {
   creer(donnees: NouvelUtilisateurAvecMotDePasseHash): Promise<Utilisateur>;
   listerParEntreprise(entrepriseId: string): Promise<Utilisateur[]>;
   modifier(id: string, donnees: ModificationUtilisateur): Promise<Utilisateur>;
+  modifierMotDePasse(id: string, motDePasseHash: string): Promise<void>;
 }
