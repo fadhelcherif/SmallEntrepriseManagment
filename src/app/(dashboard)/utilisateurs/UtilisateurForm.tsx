@@ -53,6 +53,20 @@ export function UtilisateurForm({ action }: UtilisateurFormProps) {
           />
         </label>
 
+        <label className="grid gap-2">
+          <span className="text-sm font-medium text-stone-700">Salaire mensuel</span>
+          <input
+            name="salaire"
+            type="number"
+            step="0.01"
+            min="0.01"
+            required
+            className={champClasses}
+            placeholder="1800.00"
+          />
+          <span className="text-xs text-stone-500">Une première charge de salaire sera créée automatiquement.</span>
+        </label>
+
         <MessageFormulaire message={state.message} success={state.success} />
 
         <Bouton type="submit" disabled={isPending}>

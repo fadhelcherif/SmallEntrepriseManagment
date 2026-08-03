@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { PackagePlus } from "lucide-react";
 
 import type { CreerProduitState } from "./actions";
+import { AttributsEditeur } from "./AttributsEditeur";
 import { Bouton } from "../../_components/ui/Bouton";
 import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
 import { champClasses } from "../../_components/ui/champClasses";
@@ -11,6 +12,7 @@ import { Panel } from "../../_components/ui/Panel";
 
 type ProduitFormProps = {
   entrepriseId: string;
+  nomsAttributsExistants: string[];
   action: (entrepriseId: string, previousState: CreerProduitState, formData: FormData) => Promise<CreerProduitState>;
 };
 
@@ -19,7 +21,7 @@ const initialState: CreerProduitState = {
   success: false,
 };
 
-export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
+export function ProduitForm({ entrepriseId, nomsAttributsExistants, action }: ProduitFormProps) {
   const boundAction = action.bind(null, entrepriseId);
   const [state, formAction, isPending] = useActionState(boundAction, initialState);
 
@@ -63,6 +65,8 @@ export function ProduitForm({ entrepriseId, action }: ProduitFormProps) {
           <span className="text-sm font-medium text-stone-700">Seuil d’alerte</span>
           <input name="seuilAlerte" type="number" min="0" step="1" required className={champClasses} placeholder="3" />
         </label>
+
+        <AttributsEditeur nomsExistants={nomsAttributsExistants} />
 
         <MessageFormulaire message={state.message} success={state.success} />
 

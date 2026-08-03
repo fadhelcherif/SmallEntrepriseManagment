@@ -57,6 +57,19 @@ export function UtilisateurActions({ utilisateur }: UtilisateurActionsProps) {
             </select>
           </label>
 
+          <label className="grid gap-1.5">
+            <span className="text-sm font-medium text-stone-700">Salaire mensuel</span>
+            <input
+              name="salaire"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={utilisateur.salaire ?? ""}
+              placeholder="1800.00"
+              className={champClasses}
+            />
+          </label>
+
           <label className="flex items-center gap-2 text-sm font-medium text-stone-700">
             <input
               type="checkbox"

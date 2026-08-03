@@ -5,9 +5,22 @@ import { revalidatePath } from "next/cache";
 import { creerProduit } from "../../../application/produits/creerProduit";
 import { modifierProduit } from "../../../application/produits/modifierProduit";
 import { supprimerProduit } from "../../../application/produits/supprimerProduit";
+import { trouverOuCreerAttribut } from "../../../application/attributs/trouverOuCreerAttribut";
+import { enregistrerValeursProduit } from "../../../application/attributs/enregistrerValeursProduit";
+import {
+  supprimerAttribut,
+  AccesRefuseAttributError,
+  AttributIntrouvableError,
+} from "../../../application/attributs/supprimerAttribut";
 import type { NouveauProduit } from "../../../domain/entities/Produit";
+import { ENTITE_CIBLE_PRODUIT } from "../../../domain/entities/AttributPersonnalise";
 import { ProduitInvalideError, validerProduit as validerNouveauProduit } from "../../../domain/services/validerProduit";
+import { ValeurAttributInvalideError } from "../../../domain/services/validerValeursAttributs";
+import { AttributInvalideError } from "../../../domain/services/validerAttributPersonnalise";
+import { getUtilisateurConnecte } from "../../../infrastructure/auth/getUtilisateurConnecte";
 import { PrismaProduitRepository } from "../../../infrastructure/repositories/PrismaProduitRepository";
+import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/repositories/PrismaAttributPersonnaliseRepository";
+import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
 
 export type CreerProduitState = {
   message?: string;
@@ -15,6 +28,8 @@ export type CreerProduitState = {
 };
 
 const repository = new PrismaProduitRepository();
+const attributRepository = new PrismaAttributPersonnaliseRepository();
+const valeurAttributRepository = new PrismaValeurAttributRepository();
 
 function parserDateExpiration(formData: FormData): Date | undefined {
   const valeur = String(formData.get("dateExpiration") ?? "").trim();
@@ -25,6 +40,30 @@ function parserDateExpiration(formData: FormData): Date | undefined {
 
   const dateExpiration = new Date(`${valeur}T00:00:00`);
   return Number.isNaN(dateExpiration.getTime()) ? undefined : dateExpiration;
+}
+
+type AttributSoumis = { nom: string; valeur: string };
+
+function parserAttributsSoumis(formData: FormData): AttributSoumis[] {
+  const attributsJson = String(formData.get("attributsJson") ?? "[]");
+
+  try {
+    const lignes = JSON.parse(attributsJson) as AttributSoumis[];
+    return lignes.filter((ligne) => ligne.nom?.trim().length > 0 && ligne.valeur?.trim().length > 0);
+  } catch {
+    return [];
+  }
+}
+
+async function enregistrerAttributsSoumis(entrepriseId: string, produitId: string, attributsSoumis: AttributSoumis[]): Promise<void> {
+  const valeursSoumises = new Map<string, string>();
+
+  for (const attributSoumis of attributsSoumis) {
+    const attribut = await trouverOuCreerAttribut(attributRepository, entrepriseId, attributSoumis.nom, ENTITE_CIBLE_PRODUIT);
+    valeursSoumises.set(attribut.id, attributSoumis.valeur.trim());
+  }
+
+  await enregistrerValeursProduit(attributRepository, valeurAttributRepository, entrepriseId, produitId, valeursSoumises);
 }
 
 export async function creerProduitAction(
@@ -46,7 +85,10 @@ export async function creerProduitAction(
 
   try {
     validerNouveauProduit(nouveauProduit);
-    await creerProduit(repository, nouveauProduit, entrepriseId);
+
+    const produitCree = await creerProduit(repository, nouveauProduit, entrepriseId);
+    await enregistrerAttributsSoumis(entrepriseId, produitCree.id, parserAttributsSoumis(formData));
+
     revalidatePath("/produits");
 
     return {
@@ -54,7 +96,7 @@ export async function creerProduitAction(
       success: true,
     };
   } catch (error) {
-    if (error instanceof ProduitInvalideError) {
+    if (error instanceof ProduitInvalideError || error instanceof ValeurAttributInvalideError || error instanceof AttributInvalideError) {
       return {
         message: error.message,
         success: false,
@@ -66,7 +108,7 @@ export async function creerProduitAction(
 }
 
 export async function modifierProduitAction(
-  _entrepriseId: string,
+  entrepriseId: string,
   produitId: string,
   formData: FormData,
 ): Promise<void> {
@@ -86,16 +128,10 @@ export async function modifierProduitAction(
     dateExpiration,
   };
 
-  try {
-    await modifierProduit(repository, produitId, donnees);
-    revalidatePath("/produits");
-  } catch (error) {
-    if (error instanceof ProduitInvalideError) {
-      throw error;
-    }
+  await modifierProduit(repository, produitId, donnees);
+  await enregistrerAttributsSoumis(entrepriseId, produitId, parserAttributsSoumis(formData));
 
-    throw error;
-  }
+  revalidatePath("/produits");
 }
 
 export async function supprimerProduitAction(
@@ -104,4 +140,23 @@ export async function supprimerProduitAction(
 ): Promise<void> {
   await supprimerProduit(repository, produitId);
   revalidatePath("/produits");
+}
+
+export async function supprimerAttributAction(attributId: string, _formData: FormData): Promise<void> {
+  const utilisateurConnecte = await getUtilisateurConnecte();
+
+  if (!utilisateurConnecte) {
+    return;
+  }
+
+  try {
+    await supprimerAttribut(attributRepository, utilisateurConnecte, attributId);
+    revalidatePath("/produits");
+  } catch (error) {
+    if (error instanceof AccesRefuseAttributError || error instanceof AttributIntrouvableError) {
+      return;
+    }
+
+    throw error;
+  }
 }

@@ -4,7 +4,7 @@ import type {
   UtilisateurAvecMotDePasse,
 } from "../entities/Utilisateur";
 
-export type ModificationUtilisateur = Partial<Pick<Utilisateur, "nom" | "email" | "role" | "actif">>;
+export type ModificationUtilisateur = Partial<Pick<Utilisateur, "nom" | "email" | "role" | "actif" | "salaire">>;
 
 export interface UtilisateurRepository {
   trouverParEmail(email: string): Promise<UtilisateurAvecMotDePasse | null>;

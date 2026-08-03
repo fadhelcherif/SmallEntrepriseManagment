@@ -7,24 +7,17 @@ import { creerCommande } from "../../../application/commandes/creerCommande";
 import { listerCommandes } from "../../../application/commandes/listerCommandes";
 import { validerCommande } from "../../../application/commandes/validerCommande";
 import { annulerCommande } from "../../../application/commandes/annulerCommande";
-import { receptionnerCommande } from "../../../application/commandes/receptionnerCommande";
-import { creerProduit } from "../../../application/produits/creerProduit";
+import { receptionnerCommandeFournisseur } from "../../../application/commandes/receptionnerCommandeFournisseur";
 import type { NouvelleCommande, Commande } from "../../../domain/entities/Commande";
-import type { NouveauProduit } from "../../../domain/entities/Produit";
 import { CommandeInvalideError, validerNouvelleCommande } from "../../../domain/services/validerNouvelleCommande";
-import { ProduitInvalideError, validerProduit as validerNouveauProduit } from "../../../domain/services/validerProduit";
 import { PrismaCommandeRepository } from "../../../infrastructure/repositories/PrismaCommandeRepository";
 import { PrismaProduitRepository } from "../../../infrastructure/repositories/PrismaProduitRepository";
 import { PrismaFournisseurRepository } from "../../../infrastructure/repositories/PrismaFournisseurRepository";
 import { PrismaMouvementStockRepository } from "../../../infrastructure/repositories/PrismaMouvementStockRepository";
 import { PrismaAlerteRepository } from "../../../infrastructure/repositories/PrismaAlerteRepository";
+import { PrismaChargeRepository } from "../../../infrastructure/repositories/PrismaChargeRepository";
 
 export type CreerCommandeState = {
-  message?: string;
-  success?: boolean;
-};
-
-export type CreerProduitInlineState = {
   message?: string;
   success?: boolean;
 };
@@ -92,45 +85,6 @@ export async function creerCommandeAction(
   }
 }
 
-export async function creerProduitDepuisCommandeAction(
-  entrepriseId: string,
-  _previousState: CreerProduitInlineState,
-  formData: FormData,
-): Promise<CreerProduitInlineState> {
-  const nom = String(formData.get("nom") ?? "").trim();
-  const prixAchat = Number(formData.get("prixAchat"));
-  const prixVente = Number(formData.get("prixVente"));
-  const seuilAlerte = Number(formData.get("seuilAlerte"));
-
-  const nouveauProduit: NouveauProduit = {
-    nom,
-    prixAchat,
-    prixVente,
-    seuilAlerte,
-  };
-
-  try {
-    validerNouveauProduit(nouveauProduit);
-    await creerProduit(produitRepository, nouveauProduit, entrepriseId);
-    revalidatePath("/commandes-fournisseurs");
-    revalidatePath("/produits");
-
-    return {
-      message: "Produit créé avec succès.",
-      success: true,
-    };
-  } catch (error) {
-    if (error instanceof ProduitInvalideError) {
-      return {
-        message: error.message,
-        success: false,
-      };
-    }
-
-    throw error;
-  }
-}
-
 export async function validerCommandeAction(
   _entrepriseId: string,
   formData: FormData,
@@ -150,17 +104,20 @@ export async function receptionnerCommandeAction(
     const mouvementRepositoryTransaction = new PrismaMouvementStockRepository(transactionClient);
     const alerteRepositoryTransaction = new PrismaAlerteRepository(transactionClient);
     const produitRepositoryTransaction = new PrismaProduitRepository(transactionClient);
+    const chargeRepositoryTransaction = new PrismaChargeRepository(transactionClient);
 
-    await receptionnerCommande(
+    await receptionnerCommandeFournisseur(
       commandeRepositoryTransaction,
       mouvementRepositoryTransaction,
       alerteRepositoryTransaction,
       produitRepositoryTransaction,
+      chargeRepositoryTransaction,
       commande,
     );
   });
   revalidatePath("/commandes-fournisseurs");
   revalidatePath("/produits");
+  revalidatePath("/charges");
 }
 
 export async function annulerCommandeAction(

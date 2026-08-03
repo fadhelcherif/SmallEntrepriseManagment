@@ -66,12 +66,14 @@ model Utilisateur {
   motDePasseHash String
   role           RoleUtilisateur
   actif          Boolean         @default(true)
+  salaire        Decimal?        @db.Decimal(12, 2)
   dateCreation   DateTime        @default(now())
 
   entreprise      Entreprise       @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
   journalActions  JournalAction[]
   mouvementsStock MouvementStock[]
   commandes       Commande[]
+  charges         Charge[]
 
   @@index([entrepriseId])
   @@map("utilisateurs")
@@ -102,6 +104,7 @@ model Fournisseur {
 
   entreprise Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
   commandes  Commande[]
+  charges    Charge[]
 
   @@index([entrepriseId])
   @@map("fournisseurs")
@@ -203,15 +206,22 @@ model Alerte {
 // ---------- Finance ----------
 
 model Charge {
-  id           String   @id @default(uuid())
-  entrepriseId String
-  type         String
-  montant      Decimal  @db.Decimal(12, 2)
-  dateEcheance DateTime
+  id            String   @id @default(uuid())
+  entrepriseId  String
+  utilisateurId String?
+  fournisseurId String?
+  type          String
+  montant       Decimal  @db.Decimal(12, 2)
+  dateEcheance  DateTime
+  recurrente    Boolean  @default(false)
 
-  entreprise Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  entreprise  Entreprise   @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  utilisateur Utilisateur? @relation(fields: [utilisateurId], references: [id])
+  fournisseur Fournisseur? @relation(fields: [fournisseurId], references: [id])
 
   @@index([entrepriseId])
+  @@index([utilisateurId])
+  @@index([fournisseurId])
   @@map("charges")
 }
 

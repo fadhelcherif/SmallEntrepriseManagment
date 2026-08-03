@@ -6,6 +6,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import type { Produit } from "../../../domain/entities/Produit";
 
 import { modifierProduitAction, supprimerProduitAction } from "./actions";
+import { AttributsEditeur, type AttributLigne } from "./AttributsEditeur";
 import { Bouton } from "../../_components/ui/Bouton";
 import { champClasses } from "../../_components/ui/champClasses";
 import { Modal } from "../../_components/ui/Modal";
@@ -13,6 +14,8 @@ import { Modal } from "../../_components/ui/Modal";
 type ProduitActionsProps = {
   entrepriseId: string;
   produit: Produit;
+  nomsAttributsExistants: string[];
+  attributsInitiaux: AttributLigne[];
 };
 
 function formaterDatePourInput(date?: Date | null): string {
@@ -27,7 +30,7 @@ function formaterDatePourInput(date?: Date | null): string {
   return `${annee}-${mois}-${jour}`;
 }
 
-export function ProduitActions({ entrepriseId, produit }: ProduitActionsProps) {
+export function ProduitActions({ entrepriseId, produit, nomsAttributsExistants, attributsInitiaux }: ProduitActionsProps) {
   const [modifierOuvert, setModifierOuvert] = useState(false);
   const [supprimerOuvert, setSupprimerOuvert] = useState(false);
 
@@ -126,6 +129,8 @@ export function ProduitActions({ entrepriseId, produit }: ProduitActionsProps) {
               className={champClasses}
             />
           </label>
+
+          <AttributsEditeur nomsExistants={nomsAttributsExistants} valeursInitiales={attributsInitiaux} />
 
           <div className="flex justify-end gap-2 pt-2">
             <Bouton type="button" variante="discret" onClick={() => setModifierOuvert(false)}>

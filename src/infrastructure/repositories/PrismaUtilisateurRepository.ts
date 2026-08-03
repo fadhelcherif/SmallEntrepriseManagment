@@ -18,6 +18,7 @@ function toUtilisateur(
     email: string;
     role: PrismaRoleUtilisateur;
     actif: boolean;
+    salaire: Prisma.Decimal | null;
   },
 ): Utilisateur {
   return {
@@ -27,6 +28,7 @@ function toUtilisateur(
     email: utilisateur.email,
     role: utilisateur.role,
     actif: utilisateur.actif,
+    salaire: utilisateur.salaire ? utilisateur.salaire.toNumber() : null,
   };
 }
 
@@ -38,6 +40,7 @@ function toUtilisateurAvecMotDePasse(
     email: string;
     role: PrismaRoleUtilisateur;
     actif: boolean;
+    salaire: Prisma.Decimal | null;
     motDePasseHash: string;
   },
 ): UtilisateurAvecMotDePasse {
@@ -67,6 +70,7 @@ export class PrismaUtilisateurRepository implements UtilisateurRepository {
         role: donnees.role,
         motDePasseHash: donnees.motDePasseHash,
         actif: donnees.actif ?? true,
+        salaire: donnees.salaire !== undefined && donnees.salaire !== null ? new Prisma.Decimal(donnees.salaire) : null,
       },
     });
 
@@ -98,6 +102,9 @@ export class PrismaUtilisateurRepository implements UtilisateurRepository {
         ...(donnees.email !== undefined ? { email: donnees.email } : {}),
         ...(donnees.role !== undefined ? { role: donnees.role } : {}),
         ...(donnees.actif !== undefined ? { actif: donnees.actif } : {}),
+        ...(donnees.salaire !== undefined
+          ? { salaire: donnees.salaire !== null ? new Prisma.Decimal(donnees.salaire) : null }
+          : {}),
       },
     });
 

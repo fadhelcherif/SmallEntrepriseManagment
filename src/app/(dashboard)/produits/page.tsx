@@ -1,17 +1,28 @@
+import { redirect } from "next/navigation";
+import { Package } from "lucide-react";
+
 import { creerProduitAction } from "./actions";
 import { ProduitActions } from "./ProduitActions";
 import { ProduitForm } from "./ProduitForm";
+import type { AttributLigne } from "./AttributsEditeur";
+import { SupprimerAttributBouton } from "./SupprimerAttributBouton";
 import { listerProduits } from "../../../application/produits/listerProduits";
+import { listerAttributs } from "../../../application/attributs/listerAttributs";
+import { listerValeursPourProduits } from "../../../application/attributs/listerValeursPourProduits";
 import { getUtilisateurConnecte } from "../../../infrastructure/auth/getUtilisateurConnecte";
 import { PrismaProduitRepository } from "../../../infrastructure/repositories/PrismaProduitRepository";
-import { redirect } from "next/navigation";
-import { Package } from "lucide-react";
+import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/repositories/PrismaAttributPersonnaliseRepository";
+import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
+import { ENTITE_CIBLE_PRODUIT } from "../../../domain/entities/AttributPersonnalise";
+import { grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
 import { PageHeader } from "../../_components/ui/PageHeader";
 import { Panel } from "../../_components/ui/Panel";
 import { EmptyState } from "../../_components/ui/EmptyState";
 import { Badge } from "../../_components/ui/Badge";
 
 const repository = new PrismaProduitRepository();
+const attributRepository = new PrismaAttributPersonnaliseRepository();
+const valeurAttributRepository = new PrismaValeurAttributRepository();
 
 export default async function ProduitsPage() {
   const utilisateurConnecte = await getUtilisateurConnecte();
@@ -21,6 +32,14 @@ export default async function ProduitsPage() {
   }
 
   const produits = await listerProduits(repository, utilisateurConnecte.entrepriseId);
+  const attributs = await listerAttributs(attributRepository, utilisateurConnecte.entrepriseId, ENTITE_CIBLE_PRODUIT);
+  const toutesLesValeurs = await listerValeursPourProduits(
+    valeurAttributRepository,
+    produits.map((produit) => produit.id),
+  );
+
+  const valeursParProduit = grouperValeursParProduit(toutesLesValeurs);
+  const nomsAttributsExistants = attributs.map((attribut) => attribut.nom);
 
   return (
     <main className="px-4 py-10 sm:px-6 lg:px-8">
@@ -31,7 +50,11 @@ export default async function ProduitsPage() {
         />
 
         <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
-          <ProduitForm entrepriseId={utilisateurConnecte.entrepriseId} action={creerProduitAction} />
+          <ProduitForm
+            entrepriseId={utilisateurConnecte.entrepriseId}
+            nomsAttributsExistants={nomsAttributsExistants}
+            action={creerProduitAction}
+          />
 
           <Panel title="Produits enregistrés" description={`${produits.length} produit(s) trouvé(s).`}>
             {produits.length === 0 ? (
@@ -41,7 +64,7 @@ export default async function ProduitsPage() {
                 description="Ajoute ton premier produit avec le formulaire à gauche pour démarrer le catalogue."
               />
             ) : (
-              <div className="overflow-hidden rounded-lg border border-stone-200">
+              <div className="overflow-x-auto rounded-lg border border-stone-200">
                 <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
                   <thead className="bg-stone-50 text-stone-500">
                     <tr>
@@ -50,12 +73,27 @@ export default async function ProduitsPage() {
                       <th className="px-4 py-3 text-right font-medium">Prix de vente</th>
                       <th className="px-4 py-3 text-right font-medium">Stock</th>
                       <th className="px-4 py-3 text-right font-medium">Seuil</th>
+                      {attributs.map((attribut) => (
+                        <th key={attribut.id} className="px-4 py-3 font-medium whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5">
+                            {attribut.nom}
+                            {utilisateurConnecte.role === "ADMINISTRATEUR" ? (
+                              <SupprimerAttributBouton attributId={attribut.id} nom={attribut.nom} />
+                            ) : null}
+                          </span>
+                        </th>
+                      ))}
                       <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 bg-white">
                     {produits.map((produit) => {
                       const stockBas = produit.quantiteStock <= produit.seuilAlerte;
+                      const valeursDuProduit = valeursParProduit.get(produit.id);
+
+                      const attributsInitiaux: AttributLigne[] = attributs
+                        .filter((attribut) => valeursDuProduit?.has(attribut.id))
+                        .map((attribut) => ({ nom: attribut.nom, valeur: valeursDuProduit!.get(attribut.id)! }));
 
                       return (
                         <tr key={produit.id}>
@@ -69,13 +107,27 @@ export default async function ProduitsPage() {
                           <td className="px-4 py-3 text-right text-stone-700">{produit.prixVente.toFixed(2)}</td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {stockBas ? <Badge variante="avertissement">Stock bas</Badge> : null}
+                              {stockBas ? (
+                                <Badge variante="avertissement">Stock bas</Badge>
+                              ) : (
+                                <Badge variante="succes">Stock bon</Badge>
+                              )}
                               <span className="text-stone-700">{produit.quantiteStock}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right text-stone-700">{produit.seuilAlerte}</td>
+                          {attributs.map((attribut) => (
+                            <td key={attribut.id} className="px-4 py-3 text-stone-700 whitespace-nowrap">
+                              {valeursDuProduit?.get(attribut.id) ?? "—"}
+                            </td>
+                          ))}
                           <td className="px-4 py-3">
-                            <ProduitActions entrepriseId={utilisateurConnecte.entrepriseId} produit={produit} />
+                            <ProduitActions
+                              entrepriseId={utilisateurConnecte.entrepriseId}
+                              produit={produit}
+                              nomsAttributsExistants={nomsAttributsExistants}
+                              attributsInitiaux={attributsInitiaux}
+                            />
                           </td>
                         </tr>
                       );

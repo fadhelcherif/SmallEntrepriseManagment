@@ -3,9 +3,14 @@ import { Receipt, Check, ChevronRight, PackageMinus, XCircle } from "lucide-reac
 
 import { listerCommandes } from "../../../application/commandes/listerCommandes";
 import { listerProduits } from "../../../application/produits/listerProduits";
+import { listerAttributs } from "../../../application/attributs/listerAttributs";
+import { listerValeursPourProduits } from "../../../application/attributs/listerValeursPourProduits";
 import { getUtilisateurConnecte } from "../../../infrastructure/auth/getUtilisateurConnecte";
 import { PrismaCommandeRepository } from "../../../infrastructure/repositories/PrismaCommandeRepository";
 import { PrismaProduitRepository } from "../../../infrastructure/repositories/PrismaProduitRepository";
+import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/repositories/PrismaAttributPersonnaliseRepository";
+import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
+import { ENTITE_CIBLE_PRODUIT } from "../../../domain/entities/AttributPersonnalise";
 import { creerCommandeVenteAction, validerCommandeVenteAction, annulerCommandeVenteAction, receptionnerCommandeVenteAction } from "./actions";
 import { CommandeVenteForm } from "./CommandeVenteForm";
 import { PageHeader } from "../../_components/ui/PageHeader";
@@ -17,9 +22,12 @@ import { FiltreDates } from "../../_components/ui/FiltreDates";
 import { LIBELLE_STATUT_COMMANDE } from "../../_lib/libellesStatuts";
 import { calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
 import { cleJournaliere, grouperCommandesParJour } from "../../../domain/services/grouperCommandesParJour";
+import { formaterAttributsProduit, grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
 
 const commandeRepository = new PrismaCommandeRepository();
 const produitRepository = new PrismaProduitRepository();
+const attributRepository = new PrismaAttributPersonnaliseRepository();
+const valeurAttributRepository = new PrismaValeurAttributRepository();
 
 function parserBorneDate(valeur: string | undefined, finDeJournee: boolean): Date | undefined {
   if (!valeur) {
@@ -80,6 +88,16 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
   });
 
   const produitsParId = new Map(produits.map((produit) => [produit.id, produit.nom]));
+
+  const attributsProduit = await listerAttributs(attributRepository, utilisateurConnecte.entrepriseId, ENTITE_CIBLE_PRODUIT);
+  const valeursParProduit = grouperValeursParProduit(
+    await listerValeursPourProduits(valeurAttributRepository, produits.map((produit) => produit.id)),
+  );
+  const produitsAvecAttributs = produits.map((produit) => ({
+    ...produit,
+    attributsAffichage: formaterAttributsProduit(attributsProduit, valeursParProduit.get(produit.id)),
+  }));
+
   const montantPeriode = calculerMontantTotalCommande(commandes.flatMap((commande) => commande.lignes));
   const groupesParJour = grouperCommandesParJour(commandes);
   const aujourdHui = cleJournaliere(new Date());
@@ -96,7 +114,7 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
           <CommandeVenteForm
             entrepriseId={utilisateurConnecte.entrepriseId}
             utilisateurId={utilisateurConnecte.id}
-            produits={produits}
+            produits={produitsAvecAttributs}
             action={creerCommandeVenteAction}
           />
 

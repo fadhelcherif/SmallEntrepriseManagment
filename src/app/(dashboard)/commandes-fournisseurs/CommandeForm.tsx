@@ -18,6 +18,7 @@ type ProduitOption = {
   id: string;
   nom: string;
   prixAchat: number;
+  attributsAffichage?: string;
 };
 
 type Ligne = {
@@ -103,6 +104,7 @@ export function CommandeForm({ entrepriseId, fournisseurs, produits, action, uti
                 {produits.map((produit) => (
                   <option key={produit.id} value={produit.id}>
                     {produit.nom} — {produit.prixAchat.toFixed(2)}
+                    {produit.attributsAffichage ? ` (${produit.attributsAffichage})` : ""}
                   </option>
                 ))}
               </select>

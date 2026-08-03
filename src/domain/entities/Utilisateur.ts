@@ -5,6 +5,7 @@ export type Utilisateur = {
   email: string;
   role: "ADMINISTRATEUR" | "EMPLOYE";
   actif: boolean;
+  salaire?: number | null;
 };
 
 export type UtilisateurAvecMotDePasse = Utilisateur & {
@@ -18,6 +19,7 @@ export type NouvelUtilisateur = {
   role: Utilisateur["role"];
   motDePasse: string;
   actif?: boolean;
+  salaire?: number | null;
 };
 
 export type NouvelUtilisateurAvecMotDePasseHash = Omit<NouvelUtilisateur, "motDePasse"> & {
