@@ -142,8 +142,27 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Rapports
 
-- ⬜ Rapports operationnels (employe) — pas commence
-- ⬜ Rapports globaux (administrateur) — pas commence
+- ✅ Pas d'ecran separe : les rapports vivent sur l'ecran Accueil (/) pour
+  qu'ils soient vus au quotidien plutot qu'ignores dans un onglet a part.
+  - Rapports operationnels (visibles par tous) : ventes livrees du mois,
+    achats recus du mois, valeur du stock actuel (quantiteStock x
+    prixAchat), top 5 des produits les plus vendus du mois (sur les
+    commandes clients RECUE).
+  - Rapports globaux (administrateur seulement, meme logique d'acces que
+    /charges) : donut "Repartition des ventes du mois" (achats
+    fournisseurs / autres charges / benefice), benefice = ventes livrees
+    − charges du mois. Le calcul ne soustrait pas les achats separement
+    car la charge "Achat fournisseur" les inclut deja (voir section
+    Finance — eviter le double-comptage).
+  - Donut "Ventes par produit" (visible par tous) : part de chaque
+    produit dans les ventes livrees du mois, top 4 + "Autres produits".
+  - Couches : domain/services/calculerValeurStock.ts et
+    calculerVentesParProduit.ts (fonctions pures) ; composants visuels
+    partages GraphiqueDonut (src/app/_components/ui/) ; le reste reutilise
+    les listers application existants (listerCommandes, listerProduits,
+    listerCharges), pas de nouveau cas d'usage dedie.
+  - Periode fixe au mois en cours pour l'instant (pas de selecteur de
+    date) ; a etendre si un besoin de comparer d'autres periodes apparait.
 
 ## Navigation et UX
 
@@ -156,5 +175,5 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 ## Prochaine etape recommandee
 
 Reinitialisation de mot de passe, pour clore entierement la section
-Authentification et comptes. Alternative : demarrer le module Rapports /
-Intelligence artificielle (rien de commence dans ces deux sections).
+Authentification et comptes. Alternative : demarrer le module
+Intelligence artificielle (rien de commence dans cette section).

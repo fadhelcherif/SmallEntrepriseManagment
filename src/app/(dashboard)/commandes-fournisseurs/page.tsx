@@ -87,6 +87,10 @@ export default async function CommandesFournisseursPage({ searchParams }: PagePr
   const borneFin = parserBorneDate(au, true);
 
   const commandes = toutesLesCommandes.filter((commande) => {
+    if (commande.type !== "ACHAT_FOURNISSEUR") {
+      return false;
+    }
+
     if (borneDebut && commande.dateCommande < borneDebut) {
       return false;
     }
