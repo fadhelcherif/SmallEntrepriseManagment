@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import type { Produit } from "../../../domain/entities/Produit";
 
-import { modifierProduitAction, supprimerProduitAction } from "./actions";
+import { modifierProduitAction, supprimerProduitAction, type SupprimerProduitState } from "./actions";
 import { AttributsEditeur, type AttributLigne } from "./AttributsEditeur";
 import { Bouton } from "../../_components/ui/Bouton";
 import { champClasses } from "../../_components/ui/champClasses";
+import { MessageFormulaire } from "../../_components/ui/MessageFormulaire";
 import { Modal } from "../../_components/ui/Modal";
+
+const etatInitialSuppression: SupprimerProduitState = {
+  message: undefined,
+  success: undefined,
+};
 
 type ProduitActionsProps = {
   entrepriseId: string;
@@ -33,6 +39,16 @@ function formaterDatePourInput(date?: Date | null): string {
 export function ProduitActions({ entrepriseId, produit, nomsAttributsExistants, attributsInitiaux }: ProduitActionsProps) {
   const [modifierOuvert, setModifierOuvert] = useState(false);
   const [supprimerOuvert, setSupprimerOuvert] = useState(false);
+  const [supprimerState, supprimerAction, suppressionEnCours] = useActionState(
+    supprimerProduitAction.bind(null, entrepriseId, produit.id),
+    etatInitialSuppression,
+  );
+
+  useEffect(() => {
+    if (supprimerState.success) {
+      setSupprimerOuvert(false);
+    }
+  }, [supprimerState.success]);
 
   return (
     <>
@@ -147,17 +163,19 @@ export function ProduitActions({ entrepriseId, produit, nomsAttributsExistants, 
         title={`Supprimer « ${produit.nom} » ?`}
         description="Cette action est irréversible et retire définitivement le produit du catalogue."
       >
-        <div className="flex justify-end gap-2">
-          <Bouton type="button" variante="discret" onClick={() => setSupprimerOuvert(false)}>
-            Annuler
-          </Bouton>
-          <form action={supprimerProduitAction.bind(null, entrepriseId, produit.id)}>
-            <Bouton type="submit" variante="danger">
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-              Supprimer définitivement
+        <form action={supprimerAction} className="flex flex-col gap-3">
+          <MessageFormulaire message={supprimerState.message} success={supprimerState.success} />
+
+          <div className="flex justify-end gap-2">
+            <Bouton type="button" variante="discret" onClick={() => setSupprimerOuvert(false)}>
+              Annuler
             </Bouton>
-          </form>
-        </div>
+            <Bouton type="submit" variante="danger" disabled={suppressionEnCours}>
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+              {suppressionEnCours ? "Suppression..." : "Supprimer définitivement"}
+            </Bouton>
+          </div>
+        </form>
       </Modal>
     </>
   );

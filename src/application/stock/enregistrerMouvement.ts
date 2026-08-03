@@ -32,7 +32,20 @@ export async function enregistrerMouvement(
     throw new ProduitIntrouvableError("Le produit ciblé est introuvable.");
   }
 
-  const nouveauStock = appliquerMouvementStock(produit.quantiteStock, donnees);
+  let nouveauStock: number;
+
+  try {
+    nouveauStock = appliquerMouvementStock(produit.quantiteStock, donnees);
+  } catch (error) {
+    if (error instanceof StockInsuffisantError) {
+      throw new StockInsuffisantError(
+        `Stock insuffisant pour « ${produit.nom} » (stock actuel : ${produit.quantiteStock}, quantité demandée : ${donnees.quantite}).`,
+      );
+    }
+
+    throw error;
+  }
+
   await produitRepository.modifierStock(produit.id, nouveauStock);
 
   const mouvement = await mouvementRepository.creer(donnees);

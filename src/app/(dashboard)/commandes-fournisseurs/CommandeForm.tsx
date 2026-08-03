@@ -158,7 +158,6 @@ function useStateLike<T>(action: (previousState: T, formData: FormData) => Promi
     try {
       const nextState = await action(state, formData);
       setState(nextState);
-      return nextState;
     } finally {
       setIsPending(false);
     }

@@ -1,5 +1,5 @@
 import type { Commande } from "../entities/Commande";
-import { calculerMontantTotalCommande } from "./calculerMontantCommande";
+import { calculerMontantCommandesActives } from "./calculerMontantCommande";
 
 export type GroupeCommandesJour = {
   cle: string;
@@ -35,7 +35,7 @@ export function grouperCommandesParJour(commandes: Commande[]): GroupeCommandesJ
       cle,
       date: commandesJour[0].dateCommande,
       commandes: commandesJour,
-      total: commandesJour.reduce((total, commande) => total + calculerMontantTotalCommande(commande.lignes), 0),
+      total: calculerMontantCommandesActives(commandesJour),
     }))
     .sort((a, b) => (a.cle < b.cle ? 1 : -1));
 }

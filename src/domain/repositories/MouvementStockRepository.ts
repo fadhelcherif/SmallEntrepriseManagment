@@ -3,4 +3,5 @@ import type { MouvementStock, NouveauMouvementStock } from "../entities/Mouvemen
 export interface MouvementStockRepository {
   creer(donnees: NouveauMouvementStock): Promise<MouvementStock>;
   listerParProduit(produitId: string): Promise<MouvementStock[]>;
+  listerParEntreprise(entrepriseId: string): Promise<MouvementStock[]>;
 }

@@ -70,10 +70,11 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
   - Les selecteurs de produit dans les commandes (fournisseurs et
     clients) affichent les attributs a cote du nom pour distinguer les
     variantes (ex: "T-shirt — Taille : M").
-- ⬜ Ecran "Stock" global avec l'historique de tous les mouvements de
-  l'entreprise, tous produits confondus (ENTREE / SORTIE / AJUSTEMENT) —
-  aujourd'hui l'historique n'existe qu'au niveau d'un produit
-  (/produits/[id]/mouvements), pas de vue d'ensemble transversale.
+- ✅ Ecran "Stock" global (/stock) avec l'historique de tous les mouvements
+  de l'entreprise, tous produits confondus (ENTREE / SORTIE / AJUSTEMENT),
+  avec filtre par date (du/au), par produit et par type de mouvement.
+  Complete la vue par produit existante (/produits/[id]/mouvements) par
+  une vue transversale.
 
 ## Fournisseurs et achats
 
@@ -155,7 +156,5 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 ## Prochaine etape recommandee
 
 Reinitialisation de mot de passe, pour clore entierement la section
-Authentification et comptes. Alternative : Ecran "Stock" global
-(historique transversal de tous les mouvements), ou demarrer le module
-Rapports / Intelligence artificielle (rien de commence dans ces deux
-sections).
+Authentification et comptes. Alternative : demarrer le module Rapports /
+Intelligence artificielle (rien de commence dans ces deux sections).

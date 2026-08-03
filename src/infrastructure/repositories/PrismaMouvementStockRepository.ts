@@ -51,4 +51,13 @@ export class PrismaMouvementStockRepository implements MouvementStockRepository 
 
     return mouvements.map(toMouvementStock);
   }
+
+  async listerParEntreprise(entrepriseId: string): Promise<MouvementStock[]> {
+    const mouvements = await this.client.mouvementStock.findMany({
+      where: { produit: { entrepriseId } },
+      orderBy: { date: "desc" },
+    });
+
+    return mouvements.map(toMouvementStock);
+  }
 }

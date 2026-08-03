@@ -6,5 +6,6 @@ export interface ProduitRepository {
   modifierStock(id: string, quantiteStock: number): Promise<Produit>;
   trouverParId(id: string): Promise<Produit | null>;
   supprimer(id: string): Promise<void>;
+  estUtiliseDansCommande(id: string): Promise<boolean>;
   listerParEntreprise(entrepriseId: string): Promise<Produit[]>;
 }

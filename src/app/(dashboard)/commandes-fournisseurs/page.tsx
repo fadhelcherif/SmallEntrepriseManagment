@@ -24,7 +24,7 @@ import { Bouton } from "../../_components/ui/Bouton";
 import { boutonClasses } from "../../_components/ui/boutonClasses";
 import { FiltreDates } from "../../_components/ui/FiltreDates";
 import { LIBELLE_STATUT_COMMANDE } from "../../_lib/libellesStatuts";
-import { calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
+import { calculerMontantCommandesActives, calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
 import { cleJournaliere, grouperCommandesParJour } from "../../../domain/services/grouperCommandesParJour";
 import { formaterAttributsProduit, grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
 
@@ -100,7 +100,7 @@ export default async function CommandesFournisseursPage({ searchParams }: PagePr
 
   const fournisseursParId = new Map(fournisseurs.map((fournisseur) => [fournisseur.id, fournisseur.nom]));
   const produitsParId = new Map(produits.map((produit) => [produit.id, produit.nom]));
-  const montantPeriode = calculerMontantTotalCommande(commandes.flatMap((commande) => commande.lignes));
+  const montantPeriode = calculerMontantCommandesActives(commandes);
   const groupesParJour = grouperCommandesParJour(commandes);
   const aujourdHui = cleJournaliere(new Date());
 

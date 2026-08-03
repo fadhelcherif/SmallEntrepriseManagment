@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { creerProduit } from "../../../application/produits/creerProduit";
 import { modifierProduit } from "../../../application/produits/modifierProduit";
-import { supprimerProduit } from "../../../application/produits/supprimerProduit";
+import { supprimerProduit, ProduitUtiliseError } from "../../../application/produits/supprimerProduit";
 import { trouverOuCreerAttribut } from "../../../application/attributs/trouverOuCreerAttribut";
 import { enregistrerValeursProduit } from "../../../application/attributs/enregistrerValeursProduit";
 import {
@@ -23,6 +23,11 @@ import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/re
 import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
 
 export type CreerProduitState = {
+  message?: string;
+  success?: boolean;
+};
+
+export type SupprimerProduitState = {
   message?: string;
   success?: boolean;
 };
@@ -137,9 +142,22 @@ export async function modifierProduitAction(
 export async function supprimerProduitAction(
   _entrepriseId: string,
   produitId: string,
-): Promise<void> {
-  await supprimerProduit(repository, produitId);
-  revalidatePath("/produits");
+  _previousState: SupprimerProduitState,
+  _formData: FormData,
+): Promise<SupprimerProduitState> {
+  try {
+    await supprimerProduit(repository, produitId);
+    revalidatePath("/produits");
+    revalidatePath("/stock");
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ProduitUtiliseError) {
+      return { message: error.message, success: false };
+    }
+
+    throw error;
+  }
 }
 
 export async function supprimerAttributAction(attributId: string, _formData: FormData): Promise<void> {

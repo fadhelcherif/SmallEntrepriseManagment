@@ -2,6 +2,7 @@ import type { CommandeRepository } from "../../domain/repositories/CommandeRepos
 import type { ProduitRepository } from "../../domain/repositories/ProduitRepository";
 import type { NouvelleCommande, Commande, LigneCommandeAEnregistrer } from "../../domain/entities/Commande";
 import { validerNouvelleCommande } from "../../domain/services/validerNouvelleCommande";
+import { appliquerMouvementStock, StockInsuffisantError } from "../../domain/services/appliquerMouvementStock";
 
 export class ProduitInexistantDansCommandeError extends Error {
   constructor(message = "Un produit de la commande est introuvable.") {
@@ -26,6 +27,20 @@ export async function creerCommande(
 
     if (!produit) {
       throw new ProduitInexistantDansCommandeError();
+    }
+
+    if (donnees.type === "VENTE_CLIENT") {
+      try {
+        appliquerMouvementStock(produit.quantiteStock, { produitId: produit.id, type: "SORTIE", quantite: ligne.quantite });
+      } catch (error) {
+        if (error instanceof StockInsuffisantError) {
+          throw new StockInsuffisantError(
+            `Stock insuffisant pour « ${produit.nom} » (stock actuel : ${produit.quantiteStock}, quantité demandée : ${ligne.quantite}).`,
+          );
+        }
+
+        throw error;
+      }
     }
 
     const prixParDefaut = donnees.type === "ACHAT_FOURNISSEUR" ? produit.prixAchat : produit.prixVente;

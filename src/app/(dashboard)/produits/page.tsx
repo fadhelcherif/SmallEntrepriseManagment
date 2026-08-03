@@ -18,7 +18,6 @@ import { grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
 import { PageHeader } from "../../_components/ui/PageHeader";
 import { Panel } from "../../_components/ui/Panel";
 import { EmptyState } from "../../_components/ui/EmptyState";
-import { Badge } from "../../_components/ui/Badge";
 
 const repository = new PrismaProduitRepository();
 const attributRepository = new PrismaAttributPersonnaliseRepository();
@@ -71,8 +70,6 @@ export default async function ProduitsPage() {
                       <th className="px-4 py-3 font-medium">Nom</th>
                       <th className="px-4 py-3 text-right font-medium">Prix d’achat</th>
                       <th className="px-4 py-3 text-right font-medium">Prix de vente</th>
-                      <th className="px-4 py-3 text-right font-medium">Stock</th>
-                      <th className="px-4 py-3 text-right font-medium">Seuil</th>
                       {attributs.map((attribut) => (
                         <th key={attribut.id} className="px-4 py-3 font-medium whitespace-nowrap">
                           <span className="inline-flex items-center gap-1.5">
@@ -88,7 +85,6 @@ export default async function ProduitsPage() {
                   </thead>
                   <tbody className="divide-y divide-stone-100 bg-white">
                     {produits.map((produit) => {
-                      const stockBas = produit.quantiteStock <= produit.seuilAlerte;
                       const valeursDuProduit = valeursParProduit.get(produit.id);
 
                       const attributsInitiaux: AttributLigne[] = attributs
@@ -105,17 +101,6 @@ export default async function ProduitsPage() {
                           </td>
                           <td className="px-4 py-3 text-right text-stone-700">{produit.prixAchat.toFixed(2)}</td>
                           <td className="px-4 py-3 text-right text-stone-700">{produit.prixVente.toFixed(2)}</td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {stockBas ? (
-                                <Badge variante="avertissement">Stock bas</Badge>
-                              ) : (
-                                <Badge variante="succes">Stock bon</Badge>
-                              )}
-                              <span className="text-stone-700">{produit.quantiteStock}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-right text-stone-700">{produit.seuilAlerte}</td>
                           {attributs.map((attribut) => (
                             <td key={attribut.id} className="px-4 py-3 text-stone-700 whitespace-nowrap">
                               {valeursDuProduit?.get(attribut.id) ?? "—"}

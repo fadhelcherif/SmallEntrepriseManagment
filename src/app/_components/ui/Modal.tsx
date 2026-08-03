@@ -9,9 +9,10 @@ type ModalProps = {
   title: string;
   description?: string;
   children: ReactNode;
+  large?: boolean;
 };
 
-export function Modal({ open, onClose, title, description, children }: ModalProps) {
+export function Modal({ open, onClose, title, description, children, large = false }: ModalProps) {
   useEffect(() => {
     if (!open) {
       return;
@@ -35,7 +36,9 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button type="button" aria-label="Fermer" onClick={onClose} className="absolute inset-0 bg-stone-900/40" />
 
-      <div className="relative z-10 max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-lg border border-stone-200 bg-white p-6 shadow-xl">
+      <div
+        className={`relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-lg border border-stone-200 bg-white p-6 shadow-xl ${large ? "max-w-3xl" : "max-w-lg"}`}
+      >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h2 className="font-heading text-lg font-semibold text-stone-900">{title}</h2>

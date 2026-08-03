@@ -92,6 +92,14 @@ export class PrismaProduitRepository implements ProduitRepository {
     });
   }
 
+  async estUtiliseDansCommande(id: string): Promise<boolean> {
+    const nombre = await this.client.ligneCommande.count({
+      where: { produitId: id },
+    });
+
+    return nombre > 0;
+  }
+
   async listerParEntreprise(entrepriseId: string): Promise<Produit[]> {
     const produits = await this.client.produit.findMany({
       where: {

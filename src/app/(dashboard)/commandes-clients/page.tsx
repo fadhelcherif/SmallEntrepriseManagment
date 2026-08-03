@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Receipt, Check, ChevronRight, PackageMinus, XCircle } from "lucide-react";
+import { Receipt, Check, ChevronRight, XCircle } from "lucide-react";
 
 import { listerCommandes } from "../../../application/commandes/listerCommandes";
 import { listerProduits } from "../../../application/produits/listerProduits";
@@ -13,6 +13,7 @@ import { PrismaValeurAttributRepository } from "../../../infrastructure/reposito
 import { ENTITE_CIBLE_PRODUIT } from "../../../domain/entities/AttributPersonnalise";
 import { creerCommandeVenteAction, validerCommandeVenteAction, annulerCommandeVenteAction, receptionnerCommandeVenteAction } from "./actions";
 import { CommandeVenteForm } from "./CommandeVenteForm";
+import { LivrerCommandeBouton } from "./LivrerCommandeBouton";
 import { PageHeader } from "../../_components/ui/PageHeader";
 import { Panel } from "../../_components/ui/Panel";
 import { EmptyState } from "../../_components/ui/EmptyState";
@@ -20,7 +21,7 @@ import { Badge } from "../../_components/ui/Badge";
 import { Bouton } from "../../_components/ui/Bouton";
 import { FiltreDates } from "../../_components/ui/FiltreDates";
 import { LIBELLE_STATUT_COMMANDE } from "../../_lib/libellesStatuts";
-import { calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
+import { calculerMontantCommandesActives, calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
 import { cleJournaliere, grouperCommandesParJour } from "../../../domain/services/grouperCommandesParJour";
 import { formaterAttributsProduit, grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
 
@@ -98,7 +99,7 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
     attributsAffichage: formaterAttributsProduit(attributsProduit, valeursParProduit.get(produit.id)),
   }));
 
-  const montantPeriode = calculerMontantTotalCommande(commandes.flatMap((commande) => commande.lignes));
+  const montantPeriode = calculerMontantCommandesActives(commandes);
   const groupesParJour = grouperCommandesParJour(commandes);
   const aujourdHui = cleJournaliere(new Date());
 
@@ -182,13 +183,11 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
                                   ) : null}
 
                                   {commande.statut === "VALIDEE" ? (
-                                    <form action={receptionnerCommandeVenteAction.bind(null, utilisateurConnecte.entrepriseId)}>
-                                      <input type="hidden" name="commandeJson" value={JSON.stringify(commande)} />
-                                      <Bouton type="submit" variante="succes">
-                                        <PackageMinus className="h-3.5 w-3.5" strokeWidth={1.75} />
-                                        Livrer
-                                      </Bouton>
-                                    </form>
+                                    <LivrerCommandeBouton
+                                      entrepriseId={utilisateurConnecte.entrepriseId}
+                                      commande={commande}
+                                      action={receptionnerCommandeVenteAction}
+                                    />
                                   ) : null}
 
                                   {commande.statut === "BROUILLON" || commande.statut === "VALIDEE" ? (
