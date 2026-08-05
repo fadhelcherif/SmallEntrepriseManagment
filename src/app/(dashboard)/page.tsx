@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BellRing, ClipboardList, Package, Truck, Trophy, TrendingUp, ShoppingCart, Warehouse, PiggyBank } from "lucide-react";
+import { BellRing, ClipboardList, Package, Truck, Trophy, TrendingUp, ShoppingCart, Warehouse, PiggyBank, Bot, ArrowRight } from "lucide-react";
 
 import { listerAlertes } from "../../application/alertes/listerAlertes";
 import { listerCommandes } from "../../application/commandes/listerCommandes";
@@ -28,7 +28,7 @@ import { StatCard } from "../_components/ui/StatCard";
 import { EmptyState } from "../_components/ui/EmptyState";
 import { GraphiqueDonut, type SegmentDonut } from "../_components/ui/GraphiqueDonut";
 import { FiltreMois } from "../_components/ui/FiltreMois";
-import { formaterAttributsProduit, grouperValeursParProduit } from "../_lib/formaterAttributsProduit";
+import { formaterAttributsProduit, grouperValeursParProduit } from "../../domain/services/formaterAttributsProduit";
 
 const produitRepository = new PrismaProduitRepository();
 const alerteRepository = new PrismaAlerteRepository();
@@ -204,6 +204,25 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
           <StatCard icon={ClipboardList} label="Commandes en cours" value={commandesEnCours} hint="Brouillons et validées" />
           <StatCard icon={BellRing} label="Alertes non lues" value={alertes.length} hint="À traiter" />
         </section>
+
+        <Link
+          href="/assistant"
+          className="group flex items-center justify-between gap-4 rounded-lg p-6 transition hover:opacity-95"
+          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+        >
+          <div className="flex items-center gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15">
+              <Bot className="h-6 w-6" strokeWidth={1.75} />
+            </span>
+            <div>
+              <p className="font-heading text-base font-bold">Besoin de conseils ?</p>
+              <p className="mt-0.5 text-sm opacity-80">Demande à l&apos;assistant Vantik — basé sur tes vraies données.</p>
+            </div>
+          </div>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 transition group-hover:translate-x-0.5">
+            <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
+          </span>
+        </Link>
 
         <FiltreMois mois={moisValeurInput} estMoisCourant={estMoisCourant} />
 

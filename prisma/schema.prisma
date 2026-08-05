@@ -32,6 +32,11 @@ enum TypeMouvement {
   AJUSTEMENT
 }
 
+enum RoleMessageAssistant {
+  UTILISATEUR
+  ASSISTANT
+}
+
 // ---------- Racine multi-tenant ----------
 
 model Entreprise {
@@ -52,6 +57,7 @@ model Entreprise {
   commandes              Commande[]
   charges                Charge[]
   attributsPersonnalises AttributPersonnalise[]
+  sessionsAssistant      SessionAssistant[]
 
   @@map("entreprises")
 }
@@ -75,6 +81,7 @@ model Utilisateur {
   commandes               Commande[]
   charges                 Charge[]
   tokensReinitialisation  TokenReinitialisationMotDePasse[]
+  sessionsAssistant       SessionAssistant[]
 
   @@index([entrepriseId])
   @@map("utilisateurs")
@@ -269,6 +276,37 @@ model ValeurAttribut {
   @@index([attributId])
   @@index([produitId])
   @@map("valeurs_attributs")
+}
+
+// ---------- IA : assistant conversationnel ----------
+
+model SessionAssistant {
+  id               String   @id @default(uuid())
+  entrepriseId     String
+  utilisateurId    String
+  titre            String
+  dateCreation     DateTime @default(now())
+  derniereActivite DateTime @default(now())
+
+  entreprise  Entreprise         @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  utilisateur Utilisateur        @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+  messages    MessageAssistant[]
+
+  @@index([entrepriseId, utilisateurId])
+  @@map("sessions_assistant")
+}
+
+model MessageAssistant {
+  id           String               @id @default(uuid())
+  sessionId    String
+  role         RoleMessageAssistant
+  contenu      String               @db.Text
+  dateCreation DateTime             @default(now())
+
+  session SessionAssistant @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("messages_assistant")
 }
 
 // ---------- IA : previsions et reapprovisionnement ----------

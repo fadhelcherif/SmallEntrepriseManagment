@@ -22,7 +22,7 @@ import { EmptyState } from "../../_components/ui/EmptyState";
 import { Badge } from "../../_components/ui/Badge";
 import { boutonClasses } from "../../_components/ui/boutonClasses";
 import { LIBELLE_TYPE_MOUVEMENT } from "../../_lib/libellesStatuts";
-import { formaterAttributsProduit, grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
+import { formaterAttributsProduit, grouperValeursParProduit } from "../../../domain/services/formaterAttributsProduit";
 
 const mouvementRepository = new PrismaMouvementStockRepository();
 const produitRepository = new PrismaProduitRepository();

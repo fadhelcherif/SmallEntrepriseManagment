@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Truck, ClipboardList, Receipt, BellRing, Users, ReceiptText, Settings, History, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Package, Truck, ClipboardList, Receipt, BellRing, Users, ReceiptText, Settings, History, Bot, type LucideIcon } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -14,6 +14,7 @@ const ELEMENTS_NAVIGATION: NavItem[] = [
   { href: "/commandes-fournisseurs", label: "Commandes fournisseurs", icon: ClipboardList },
   { href: "/commandes-clients", label: "Commandes clients", icon: Receipt },
   { href: "/alertes", label: "Alertes", icon: BellRing },
+  { href: "/assistant", label: "Assistant", icon: Bot },
 ];
 
 const ELEMENTS_NAVIGATION_ADMIN: NavItem[] = [

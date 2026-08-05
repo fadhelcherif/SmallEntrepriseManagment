@@ -14,7 +14,7 @@ import { PrismaProduitRepository } from "../../../infrastructure/repositories/Pr
 import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/repositories/PrismaAttributPersonnaliseRepository";
 import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
 import { ENTITE_CIBLE_PRODUIT } from "../../../domain/entities/AttributPersonnalise";
-import { grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
+import { grouperValeursParProduit } from "../../../domain/services/formaterAttributsProduit";
 import { PageHeader } from "../../_components/ui/PageHeader";
 import { Panel } from "../../_components/ui/Panel";
 import { EmptyState } from "../../_components/ui/EmptyState";

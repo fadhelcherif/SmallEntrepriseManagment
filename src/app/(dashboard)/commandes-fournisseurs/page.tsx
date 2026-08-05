@@ -26,7 +26,7 @@ import { FiltreDates } from "../../_components/ui/FiltreDates";
 import { LIBELLE_STATUT_COMMANDE } from "../../_lib/libellesStatuts";
 import { calculerMontantCommandesActives, calculerMontantTotalCommande } from "../../../domain/services/calculerMontantCommande";
 import { cleJournaliere, grouperCommandesParJour } from "../../../domain/services/grouperCommandesParJour";
-import { formaterAttributsProduit, grouperValeursParProduit } from "../../_lib/formaterAttributsProduit";
+import { formaterAttributsProduit, grouperValeursParProduit } from "../../../domain/services/formaterAttributsProduit";
 
 const commandeRepository = new PrismaCommandeRepository();
 const fournisseurRepository = new PrismaFournisseurRepository();

@@ -24,6 +24,7 @@ type ProduitOption = {
 type Ligne = {
   produitId: string;
   quantite: number;
+  prixApplique: number;
 };
 
 type CommandeFormProps = {
@@ -39,17 +40,30 @@ const initialState: CreerCommandeState = {
   success: false,
 };
 
+function creerLigneParDefaut(produits: ProduitOption[]): Ligne {
+  const premierProduit = produits[0];
+  return {
+    produitId: premierProduit?.id ?? "",
+    quantite: 1,
+    prixApplique: premierProduit?.prixAchat ?? 0,
+  };
+}
+
 export function CommandeForm({ entrepriseId, fournisseurs, produits, action, utilisateurId }: CommandeFormProps) {
   const [state, formAction, isPending] = useStateLike(action.bind(null, entrepriseId, utilisateurId), initialState);
   const [fournisseurId, setFournisseurId] = useState(fournisseurs[0]?.id ?? "");
-  const [lignes, setLignes] = useState<Ligne[]>([{ produitId: produits[0]?.id ?? "", quantite: 1 }]);
+  const [lignes, setLignes] = useState<Ligne[]>([creerLigneParDefaut(produits)]);
 
   const lignesJson = useMemo(() => JSON.stringify(lignes), [lignes]);
+  const montantTotal = useMemo(
+    () => lignes.reduce((total, ligne) => total + ligne.quantite * ligne.prixApplique, 0),
+    [lignes],
+  );
 
   return (
     <Panel
       title="Nouvelle commande fournisseur"
-      description="Le prix est copié automatiquement depuis le produit au moment de la création."
+      description="Le prix est proposé automatiquement depuis le produit mais reste modifiable pour négocier avec le fournisseur."
       className="h-fit"
     >
       <form action={formAction} className="grid gap-4">
@@ -80,7 +94,7 @@ export function CommandeForm({ entrepriseId, fournisseurs, produits, action, uti
             <span className="text-sm font-medium text-stone-700">Lignes</span>
             <button
               type="button"
-              onClick={() => setLignes((current) => [...current, { produitId: produits[0]?.id ?? "", quantite: 1 }])}
+              onClick={() => setLignes((current) => [...current, creerLigneParDefaut(produits)])}
               className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:border-stone-900 hover:text-stone-900"
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -88,53 +102,92 @@ export function CommandeForm({ entrepriseId, fournisseurs, produits, action, uti
             </button>
           </div>
 
-          {lignes.map((ligne, index) => (
-            <div key={index} className="grid gap-2 rounded-md border border-stone-200 bg-stone-50 p-3">
-              <select
-                value={ligne.produitId}
-                onChange={(event) => {
-                  const produitId = event.target.value;
-                  setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, produitId } : ligneCourante)));
-                }}
-                className={champClasses}
-              >
-                <option value="" disabled>
-                  Sélectionner un produit
-                </option>
-                {produits.map((produit) => (
-                  <option key={produit.id} value={produit.id}>
-                    {produit.nom} — {produit.prixAchat.toFixed(2)}
-                    {produit.attributsAffichage ? ` (${produit.attributsAffichage})` : ""}
-                  </option>
-                ))}
-              </select>
+          {lignes.map((ligne, index) => {
+            const sousTotal = ligne.quantite * ligne.prixApplique;
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={ligne.quantite}
+            return (
+              <div key={index} className="grid gap-2 rounded-md border border-stone-200 bg-stone-50 p-3">
+                <select
+                  value={ligne.produitId}
                   onChange={(event) => {
-                    const quantite = Number(event.target.value);
-                    setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, quantite } : ligneCourante)));
-                  }}
-                  className={`${champClasses} !w-24 shrink-0`}
-                />
+                    const produitId = event.target.value;
+                    const produit = produits.find((option) => option.id === produitId);
 
-                <button
-                  type="button"
-                  onClick={() => setLignes((current) => current.filter((_, ligneIndex) => ligneIndex !== index))}
-                  disabled={lignes.length === 1}
-                  aria-label="Supprimer la ligne"
-                  title="Supprimer la ligne"
-                  className="ml-auto inline-flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-700 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    setLignes((current) =>
+                      current.map((ligneCourante, ligneIndex) =>
+                        ligneIndex === index
+                          ? { ...ligneCourante, produitId, prixApplique: produit?.prixAchat ?? ligneCourante.prixApplique }
+                          : ligneCourante,
+                      ),
+                    );
+                  }}
+                  className={champClasses}
                 >
-                  <Trash2 className="h-4 w-4" strokeWidth={1.75} />
-                </button>
+                  <option value="" disabled>
+                    Sélectionner un produit
+                  </option>
+                  {produits.map((produit) => (
+                    <option key={produit.id} value={produit.id}>
+                      {produit.nom} — {produit.prixAchat.toFixed(2)}
+                      {produit.attributsAffichage ? ` (${produit.attributsAffichage})` : ""}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+                  <label className="grid gap-1">
+                    <span className="text-xs font-medium uppercase tracking-wide text-stone-500">Quantité</span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={ligne.quantite}
+                      onChange={(event) => {
+                        const quantite = Number(event.target.value);
+                        setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, quantite } : ligneCourante)));
+                      }}
+                      className={champClasses}
+                    />
+                  </label>
+
+                  <label className="grid gap-1">
+                    <span className="text-xs font-medium uppercase tracking-wide text-stone-500">Prix négocié</span>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={ligne.prixApplique}
+                      onChange={(event) => {
+                        const prixApplique = Number(event.target.value);
+                        setLignes((current) => current.map((ligneCourante, ligneIndex) => (ligneIndex === index ? { ...ligneCourante, prixApplique } : ligneCourante)));
+                      }}
+                      className={champClasses}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setLignes((current) => current.filter((_, ligneIndex) => ligneIndex !== index))}
+                    disabled={lignes.length === 1}
+                    aria-label="Supprimer la ligne"
+                    title="Supprimer la ligne"
+                    className="inline-flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-md border border-red-200 text-red-700 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                  </button>
+                </div>
+
+                <p className="text-right text-xs text-stone-500">
+                  Sous-total : <span className="font-medium text-stone-700">{sousTotal.toFixed(2)}</span>
+                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        <div className="flex items-center justify-between rounded-md border border-stone-200 bg-stone-50 px-3 py-2.5">
+          <span className="text-sm font-medium text-stone-700">Total commande</span>
+          <span className="font-heading text-lg font-semibold text-stone-900">{montantTotal.toFixed(2)}</span>
         </div>
 
         <MessageFormulaire message={state.message} success={state.success} />

@@ -1,5 +1,5 @@
-import type { AttributPersonnalise } from "../../domain/entities/AttributPersonnalise";
-import type { ValeurAttribut } from "../../domain/entities/ValeurAttribut";
+import type { AttributPersonnalise } from "../entities/AttributPersonnalise";
+import type { ValeurAttribut } from "../entities/ValeurAttribut";
 
 /** Regroupe une liste plate de ValeurAttribut en Map<produitId, Map<attributId, valeur>>. */
 export function grouperValeursParProduit(valeurs: ValeurAttribut[]): Map<string, Map<string, string>> {

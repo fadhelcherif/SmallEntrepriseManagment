@@ -30,8 +30,14 @@ const alerteRepository = new PrismaAlerteRepository();
 
 function parserLignes(formData: FormData): NouvelleCommande["lignes"] {
   const lignesJson = String(formData.get("lignesJson") ?? "[]");
-  const lignes = JSON.parse(lignesJson) as Array<{ produitId: string; quantite: number }>;
-  return lignes.filter((ligne) => ligne.produitId && Number(ligne.quantite) > 0);
+  const lignes = JSON.parse(lignesJson) as Array<{ produitId: string; quantite: number; prixApplique?: number }>;
+  return lignes
+    .filter((ligne) => ligne.produitId && Number(ligne.quantite) > 0)
+    .map((ligne) => ({
+      produitId: ligne.produitId,
+      quantite: Number(ligne.quantite),
+      prixApplique: ligne.prixApplique !== undefined && Number(ligne.prixApplique) > 0 ? Number(ligne.prixApplique) : undefined,
+    }));
 }
 
 function parserCommande(formData: FormData): Commande {
