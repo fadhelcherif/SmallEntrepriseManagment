@@ -7,6 +7,7 @@ import { listerCommandes } from "../../application/commandes/listerCommandes";
 import { listerFournisseurs } from "../../application/fournisseurs/listerFournisseurs";
 import { listerProduits } from "../../application/produits/listerProduits";
 import { listerCharges } from "../../application/charges/listerCharges";
+import { genererRapportPrevisions } from "../../application/previsions/genererRapportPrevisions";
 import { TYPE_CHARGE_ACHAT_FOURNISSEUR } from "../../domain/entities/Charge";
 import { listerAttributs } from "../../application/attributs/listerAttributs";
 import { listerValeursPourProduits } from "../../application/attributs/listerValeursPourProduits";
@@ -27,6 +28,7 @@ import { Panel } from "../_components/ui/Panel";
 import { StatCard } from "../_components/ui/StatCard";
 import { EmptyState } from "../_components/ui/EmptyState";
 import { GraphiqueDonut, type SegmentDonut } from "../_components/ui/GraphiqueDonut";
+import { GraphiqueBarresPrevision } from "../_components/ui/GraphiqueBarresPrevision";
 import { FiltreMois } from "../_components/ui/FiltreMois";
 import { formaterAttributsProduit, grouperValeursParProduit } from "../../domain/services/formaterAttributsProduit";
 
@@ -102,6 +104,15 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
   }
 
   const estAdministrateur = utilisateurConnecte.role === "ADMINISTRATEUR";
+
+  const rapportPrevisions = await genererRapportPrevisions(
+    produitRepository,
+    commandeRepository,
+    chargeRepository,
+    fournisseurRepository,
+    utilisateurConnecte.entrepriseId,
+    estAdministrateur,
+  );
 
   const commandesEnCours = commandes.filter(
     (commande) => commande.statut === "BROUILLON" || commande.statut === "VALIDEE",
@@ -223,6 +234,20 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
           </span>
         </Link>
+
+        {!rapportPrevisions.chiffreAffaires.historiqueInsuffisant ? (
+          <Panel
+            title="Prévisions"
+            description="Chiffre d'affaires réel et prévu, 3 prochains mois."
+            actions={
+              <Link href="/previsions" className="text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 hover:text-stone-900">
+                Voir le rapport complet
+              </Link>
+            }
+          >
+            <GraphiqueBarresPrevision points={rapportPrevisions.chiffreAffaires.courbe} hauteur={140} />
+          </Panel>
+        ) : null}
 
         <FiltreMois mois={moisValeurInput} estMoisCourant={estMoisCourant} />
 

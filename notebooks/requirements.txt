@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+statsmodels
+sqlalchemy
+psycopg2-binary
+python-dotenv
+ipykernel
+nbformat
+nbclient
+nbconvert

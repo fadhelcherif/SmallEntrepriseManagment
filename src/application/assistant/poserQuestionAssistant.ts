@@ -6,8 +6,10 @@ import type { ProduitRepository } from "../../domain/repositories/ProduitReposit
 import type { UtilisateurRepository } from "../../domain/repositories/UtilisateurRepository";
 import type { AttributPersonnaliseRepository } from "../../domain/repositories/AttributPersonnaliseRepository";
 import type { ValeurAttributRepository } from "../../domain/repositories/ValeurAttributRepository";
+import type { MouvementStockRepository } from "../../domain/repositories/MouvementStockRepository";
 import type { MessageAssistantRepository } from "../../domain/repositories/MessageAssistantRepository";
 import type { SessionAssistantRepository } from "../../domain/repositories/SessionAssistantRepository";
+import type { Charge } from "../../domain/entities/Charge";
 import type { MessageAssistant } from "../../domain/entities/MessageAssistant";
 import type { SessionAssistant } from "../../domain/entities/SessionAssistant";
 import { ENTITE_CIBLE_PRODUIT } from "../../domain/entities/AttributPersonnalise";
@@ -21,9 +23,11 @@ import {
   construireCatalogue,
   construireContexteAssistant,
   nomsProduitsParId,
+  type AjustementStock,
   type FicheChargeParType,
   type FicheFournisseur,
   type MembreEquipe,
+  type MoisChargeTendance,
   type MoisTendance,
   type ProduitFourni,
 } from "../../domain/services/construireContexteAssistant";
@@ -35,12 +39,11 @@ import { listerProduits } from "../produits/listerProduits";
 import { listerUtilisateurs } from "../utilisateurs/listerUtilisateurs";
 import { listerAttributs } from "../attributs/listerAttributs";
 import { listerValeursPourProduits } from "../attributs/listerValeursPourProduits";
+import { listerMouvementsEntreprise } from "../stock/listerMouvementsEntreprise";
 import { chargerSessionAssistant } from "./chargerSessionAssistant";
 import type { Commande } from "../../domain/entities/Commande";
 
 const NOMBRE_MESSAGES_HISTORIQUE = 20;
-
-const NOMBRE_MOIS_TENDANCE = 6;
 
 function debutDuMois(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -54,10 +57,14 @@ function libelleMois(date: Date): string {
   return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(date);
 }
 
-function calculerTendanceMensuelle(commandes: Commande[], maintenant: Date): MoisTendance[] {
+function moisEcoules(depuis: Date, maintenant: Date): number {
+  return (maintenant.getFullYear() - depuis.getFullYear()) * 12 + (maintenant.getMonth() - depuis.getMonth()) + 1;
+}
+
+function calculerTendanceMensuelle(commandes: Commande[], maintenant: Date, nombreMois: number): MoisTendance[] {
   const mois: MoisTendance[] = [];
 
-  for (let decalage = NOMBRE_MOIS_TENDANCE - 1; decalage >= 0; decalage--) {
+  for (let decalage = nombreMois - 1; decalage >= 0; decalage--) {
     const reference = new Date(maintenant.getFullYear(), maintenant.getMonth() - decalage, 1);
     const borneDebut = debutDuMois(reference);
     const borneFin = finDuMois(reference);
@@ -78,6 +85,25 @@ function calculerTendanceMensuelle(commandes: Commande[], maintenant: Date): Moi
   return mois;
 }
 
+function calculerTendanceChargesMensuelle(charges: Charge[], maintenant: Date, nombreMois: number): MoisChargeTendance[] {
+  const mois: MoisChargeTendance[] = [];
+
+  for (let decalage = nombreMois - 1; decalage >= 0; decalage--) {
+    const reference = new Date(maintenant.getFullYear(), maintenant.getMonth() - decalage, 1);
+    const borneDebut = debutDuMois(reference);
+    const borneFin = finDuMois(reference);
+
+    const chargesDuMois = charges.filter((charge) => charge.dateEcheance >= borneDebut && charge.dateEcheance <= borneFin);
+
+    mois.push({
+      libelle: libelleMois(reference),
+      montant: chargesDuMois.reduce((total, charge) => total + charge.montant, 0),
+    });
+  }
+
+  return mois;
+}
+
 export async function poserQuestionAssistant(
   produitRepository: ProduitRepository,
   alerteRepository: AlerteRepository,
@@ -87,6 +113,7 @@ export async function poserQuestionAssistant(
   utilisateurRepository: UtilisateurRepository,
   attributRepository: AttributPersonnaliseRepository,
   valeurAttributRepository: ValeurAttributRepository,
+  mouvementRepository: MouvementStockRepository,
   sessionAssistantRepository: SessionAssistantRepository,
   messageAssistantRepository: MessageAssistantRepository,
   assistantIA: AssistantIA,
@@ -118,12 +145,13 @@ export async function poserQuestionAssistant(
     .slice(-NOMBRE_MESSAGES_HISTORIQUE)
     .map((message) => ({ role: message.role, contenu: message.contenu }));
 
-  const [produits, alertes, commandes, fournisseurs, attributsProduit] = await Promise.all([
+  const [produits, alertes, commandes, fournisseurs, attributsProduit, mouvements] = await Promise.all([
     listerProduits(produitRepository, entrepriseId),
     listerAlertes(alerteRepository, entrepriseId),
     listerCommandes(commandeRepository, entrepriseId),
     listerFournisseurs(fournisseurRepository, entrepriseId),
     listerAttributs(attributRepository, entrepriseId, ENTITE_CIBLE_PRODUIT),
+    listerMouvementsEntreprise(mouvementRepository, entrepriseId),
   ]);
 
   const valeursAttributsParProduit = grouperValeursParProduit(
@@ -164,6 +192,17 @@ export async function poserQuestionAssistant(
   );
 
   const nomsProduits = nomsProduitsParId(produits);
+
+  const ajustementsStock: AjustementStock[] = mouvements
+    .filter((mouvement) => mouvement.type === "AJUSTEMENT")
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 10)
+    .map((mouvement) => ({
+      produitNom: nomsProduits.get(mouvement.produitId) ?? mouvement.produitId,
+      nouveauStock: mouvement.quantite,
+      date: mouvement.date,
+      motif: mouvement.motif ?? null,
+    }));
 
   const achatsRecusTous = commandes.filter((commande) => commande.type === "ACHAT_FOURNISSEUR" && commande.statut === "RECUE");
   const statsParFournisseurId = new Map<string, { nombreCommandes: number; montantTotalAchete: number }>();
@@ -211,8 +250,23 @@ export async function poserQuestionAssistant(
     })
     .sort((a, b) => b.montantTotalAchete - a.montantTotalAchete);
 
+  const dateDebutActivite = commandes.reduce(
+    (plusAncienne, commande) => (commande.dateCommande < plusAncienne ? commande.dateCommande : plusAncienne),
+    maintenant,
+  );
+  const nombreMoisTendance = Math.max(1, moisEcoules(dateDebutActivite, maintenant));
+
+  const tendanceMensuelle = calculerTendanceMensuelle(commandes, maintenant, nombreMoisTendance);
+
   let finance:
-    | { montantChargesDuMois: number; margeEstimee: number; chargesParType: FicheChargeParType[]; equipe: MembreEquipe[] }
+    | {
+        montantChargesDuMois: number;
+        margeEstimee: number;
+        chargesParType: FicheChargeParType[];
+        tendanceCharges: MoisChargeTendance[];
+        margeParMois: MoisChargeTendance[];
+        equipe: MembreEquipe[];
+      }
     | undefined;
 
   if (estAdministrateur) {
@@ -243,10 +297,18 @@ export async function poserQuestionAssistant(
       salaire: utilisateur.salaire ?? null,
     }));
 
+    const tendanceCharges = calculerTendanceChargesMensuelle(charges, maintenant, nombreMoisTendance);
+    const margeParMois: MoisChargeTendance[] = tendanceMensuelle.map((mois, index) => ({
+      libelle: mois.libelle,
+      montant: mois.montantVentes - tendanceCharges[index].montant,
+    }));
+
     finance = {
       montantChargesDuMois,
       margeEstimee: montantVentesDuMois - montantChargesDuMois,
       chargesParType,
+      tendanceCharges,
+      margeParMois,
       equipe,
     };
   }
@@ -261,10 +323,11 @@ export async function poserQuestionAssistant(
     topProduitsVendus,
     produitsParId: nomsProduits,
     catalogue: construireCatalogue(produits, ventesParProduitToutes, attributsAffichageParProduit),
-    tendanceMensuelle: calculerTendanceMensuelle(commandes, maintenant),
+    tendanceMensuelle,
     fournisseurs: fournisseursAvecStats,
     commandesEnCours,
     tauxAnnulationCommandes,
+    ajustementsStock,
     finance,
   });
 

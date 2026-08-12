@@ -146,10 +146,122 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Intelligence artificielle
 
-- ⬜ Analyse de l'historique — pas commence
-- ⬜ Generation de previsions — pas commence
-- ⬜ Recommandations de reapprovisionnement — pas commence
-- ⬜ Detection d'anomalies — pas commence
+- ✅ Assistant conversationnel (page /assistant) — analyse l'historique et
+  repond aux questions en langage naturel, base sur les vraies donnees de
+  l'entreprise (produits, commandes, fournisseurs, charges, equipe,
+  mouvements de stock, alertes, attributs personnalises).
+  - Modele : Groq (llama-3.3-70b-versatile), gratuit. Limite reelle du
+    tier gratuit : 12000 tokens/minute — empeche d'envoyer les donnees
+    brutes en entier des qu'une entreprise a plusieurs mois d'historique
+    (teste et confirme avec 2 ans de donnees reelles). Le contexte reste
+    donc des agregats pre-calcules (tendance mensuelle glissante sur tout
+    l'historique de l'entreprise, marge par mois, repartition par
+    fournisseur/type de charge, catalogue trie par chiffre d'affaires...),
+    jamais un dump brut des tables.
+  - Historique de conversation persiste (SessionAssistant /
+    MessageAssistant), plusieurs sessions par utilisateur, reprise
+    possible, titre auto-genere depuis la premiere question.
+  - Couches : domain/services/construireContexteAssistant.ts (formatte le
+    contexte texte) + AssistantIA.ts (interface) ; application/assistant/
+    (poserQuestionAssistant, listerSessionsAssistant, chargerSessionAssistant,
+    supprimerSessionAssistant) ; infrastructure/ia/GroqAssistantIA.ts
+    (implementation) + PrismaSessionAssistantRepository /
+    PrismaMessageAssistantRepository.
+- 🚧 Generation de previsions — notebook de validation termine, implementation
+  production pas commencee. Exigence explicite (retour utilisateur) : les
+  previsions doivent etre concretes et directement actionnables, pas des
+  estimations vagues. Doit couvrir au minimum :
+  - Quantite a racheter par produit (reapprovisionnement chiffre, pas
+    juste une alerte de seuil).
+  - Montant a investir / mettre de cote pour la croissance : PAS base sur
+    la marge brute du dernier mois seul (trop bruitee, ~33% de coefficient
+    de variation observe sur des donnees reelles propres). Base sur la
+    marge moyenne lissee des 3 derniers mois (ou la tendance du modele
+    gagnant), et force a 0 si les mois recents sont nets negatifs — pas
+    de recommandation de reinvestissement tant que l'activite est
+    deficitaire.
+  - Niveau de stock cible par produit.
+  - Un niveau de confiance par produit, pas juste un chiffre : le
+    notebook a montre un ecart enorme entre l'erreur du chiffre
+    d'affaires global (MAPE ~9.6%) et l'erreur par produit (22% a 136%
+    selon le produit). Un chiffre de reapprovisionnement pour un produit
+    a forte erreur historique doit etre affiche comme une fourchette
+    (a partir de l'ecart-type des residus de backtest) et/ou marque
+    "faible confiance", jamais avec la meme autorite qu'un produit fiable.
+  - Cadence de recalcul explicite (mensuelle, a la demande, ou declenchee
+    apres N nouvelles commandes) — pas une prevision statique presentee
+    une fois pour toutes.
+  - Detection des scenarios de perte, pas seulement de croissance : on
+    projette les ventes ET les charges separement (meme methode), puis on
+    soustrait les deux projections. Si la marge projetee devient
+    negative ou baisse, c'est le signal de risque — pas un revenu projete
+    tout seul, qui peut sembler correct pendant que les charges
+    grimpent plus vite en arriere-plan.
+  - Un rapport complet regroupant tout ca, pense pour aider concretement
+    la croissance de l'entreprise — pas juste des chiffres bruts.
+  - Decision technique deja actee : pas de modele pretraine sur un
+    dataset externe (Kaggle etc.) ni de modele genre XGBoost/Random
+    Forest — les datasets de prevision retail existants (Rossmann,
+    Walmart Recruiting, M5...) sont propres a un commerce donne et ne
+    generalisent pas a un type d'entreprise different, et les modeles a
+    base d'arbres ont besoin de bien plus de donnees que les quelques
+    dizaines de points mensuels qu'une seule entreprise aura jamais. Les
+    modeles sont reentraines a la volee, par entreprise, a partir de ses
+    seules donnees — aucune donnee d'une entreprise n'influence jamais
+    la prevision d'une autre, donc le type de commerce utilise pour
+    valider la methodologie (voir notebook) n'introduit pas de biais.
+    A la place, deux modeles legers compares par entreprise :
+    - Regression lineaire (tendance) vs methode de Holt (lissage
+      exponentiel double, avec tendance — pas le lissage simple, qui n'a
+      pas de terme de tendance et perdrait injustement face a la
+      regression). Holt-Winters (terme saisonnier en plus) a besoin
+      d'au moins 24 mois pour etre *ajuste*, mais d'au moins ~28 mois
+      pour etre *backteste* de facon fiable (confirme par le notebook :
+      avec 24 mois exactement, Holt-Winters ne peut pas etre inclus
+      dans la comparaison chiffree faute d'origines de backtest valides
+      — un ajustement unique illustratif reste possible, mais non valide).
+    - Validation par rolling-origin backtesting (entrainement sur les
+      mois 1..k, test sur k+1, on avance), erreurs agregees en
+      MAE/RMSE/MAPE (ou sMAPE si des mois a tres faible activite faussent
+      le MAPE). Le modele gagnant est garde, par entreprise (et peut
+      differer d'un produit/serie a l'autre).
+    - Garde-fou : sous ~8 mois d'historique, pas de comparaison
+      (backtest pas fiable sur si peu de points) — on affiche une simple
+      tendance avec un avertissement plutot qu'un chiffre presente comme
+      fiable.
+    - Implementation prevue en fonctions pures dans domain/services/
+      (regression, lissage, scoring), orchestration dans un nouveau
+      application/previsions/ — aucune dependance externe, aucun service
+      Python, meme approche que le reste de l'app.
+  - ✅ Notebook Jupyter de validation academique (rapport de stage) :
+    `notebooks/previsions.ipynb`, execute sur les donnees reelles de
+    l'entreprise de test (forsa, 24 mois propres, sans anomalie injectee
+    volontairement). Conclusions obtenues :
+    - Chiffre d'affaires global : Regression lineaire et Holt quasiment
+      a egalite (RMSE 541.41 vs 541.42, MAPE ~9.6% les deux) — la
+      tendance globale est assez simple pour qu'une droite suffise.
+    - Holt-Winters exclu de la comparaison chiffree (voir ci-dessus).
+    - Par produit : la regression lineaire gagne sur 8 des 9 produits
+      testes, Holt sur 1 seul — mais l'erreur par produit (22% a 136%
+      de MAPE) est bien plus elevee que sur l'agrege (~9.6%), surtout
+      pour les produits a faible volume ou saisonniers (Écharpe Hiver,
+      Maillot de Bain, Ceinture Cuir) : prevoir le total est nettement
+      plus fiable que prevoir un produit individuel avec ~24 points.
+    - Vit hors de src/ (pas dans l'architecture en couches), sert
+      uniquement a documenter/valider l'approche choisie — l'application
+      Vantik n'en depend jamais au runtime (aucune dependance
+      Python/notebook dans le code de production). Regenerable via
+      `notebooks/build_notebook.py` + `notebooks/run_notebook.py`.
+- ⬜ Recommandations de reapprovisionnement — pas commence. Lie au point
+  precedent : une fois la prevision de demande calculee, en deduire une
+  quantite de commande suggeree par produit, en tenant compte du
+  seuilAlerte et du delaiLivraisonJours du fournisseur.
+- 🚧 Detection d'anomalies — pas de detection statistique dediee (pas de
+  calcul de type z-score), mais l'assistant conversationnel signale deja
+  les anomalies qu'il repere dans les donnees fournies (pics/chutes,
+  taux d'annulation eleve, marge negative...) sans qu'on ait besoin de le
+  demander explicitement (consigne dans le system prompt de
+  GroqAssistantIA.ts).
 
 ## Rapports
 
@@ -185,7 +297,9 @@ Legende : ✅ termine et teste | 🚧 en cours | ⬜ pas commence
 
 ## Prochaine etape recommandee
 
-La section Authentification et comptes est maintenant complete. Prochain
-chantier logique : le module Intelligence artificielle (rien de commence
-dans cette section), ou "Modeles par categorie d'entreprise" (plus petit,
-idee deja documentee mais jamais implementee).
+L'assistant conversationnel est en place. Prochain chantier logique dans
+le module Intelligence artificielle : la generation de previsions
+(regression/moyenne mobile par entreprise, voir notes ci-dessus), qui
+debloque ensuite les recommandations de reapprovisionnement. Sinon,
+"Modeles par categorie d'entreprise" reste une option plus petite (idee
+deja documentee mais jamais implementee).

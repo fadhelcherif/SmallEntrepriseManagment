@@ -15,6 +15,7 @@ import { PrismaFournisseurRepository } from "../../../infrastructure/repositorie
 import { PrismaUtilisateurRepository } from "../../../infrastructure/repositories/PrismaUtilisateurRepository";
 import { PrismaAttributPersonnaliseRepository } from "../../../infrastructure/repositories/PrismaAttributPersonnaliseRepository";
 import { PrismaValeurAttributRepository } from "../../../infrastructure/repositories/PrismaValeurAttributRepository";
+import { PrismaMouvementStockRepository } from "../../../infrastructure/repositories/PrismaMouvementStockRepository";
 import { PrismaSessionAssistantRepository } from "../../../infrastructure/repositories/PrismaSessionAssistantRepository";
 import { PrismaMessageAssistantRepository } from "../../../infrastructure/repositories/PrismaMessageAssistantRepository";
 import { GroqAssistantIA } from "../../../infrastructure/ia/GroqAssistantIA";
@@ -35,6 +36,7 @@ const fournisseurRepository = new PrismaFournisseurRepository();
 const utilisateurRepository = new PrismaUtilisateurRepository();
 const attributRepository = new PrismaAttributPersonnaliseRepository();
 const valeurAttributRepository = new PrismaValeurAttributRepository();
+const mouvementRepository = new PrismaMouvementStockRepository();
 const sessionAssistantRepository = new PrismaSessionAssistantRepository();
 const messageAssistantRepository = new PrismaMessageAssistantRepository();
 const assistantIA = new GroqAssistantIA();
@@ -72,6 +74,7 @@ export async function poserQuestionAction(
       utilisateurRepository,
       attributRepository,
       valeurAttributRepository,
+      mouvementRepository,
       sessionAssistantRepository,
       messageAssistantRepository,
       assistantIA,

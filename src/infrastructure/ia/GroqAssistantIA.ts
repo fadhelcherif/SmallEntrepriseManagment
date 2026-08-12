@@ -45,7 +45,11 @@ export class GroqAssistantIA implements AssistantIA {
               "pousser, quel prix ajuster, quel stock réapprovisionner, quelle charge questionner) — jamais un " +
               "conseil générique ('vendez plus', 'réduisez les coûts') sans lien avec les données précises fournies.\n" +
               "4. Si une anomalie ou un risque saute aux yeux dans les données (même si la question ne porte pas " +
-              "dessus), signale-le brièvement avant de répondre à la question posée.\n\n" +
+              "dessus), signale-le brièvement avant de répondre à la question posée.\n" +
+              "5. Si on te demande de classer, comparer ou désigner le meilleur/pire élément (produit, fournisseur, " +
+              "mois...), tranche avec les données fournies (marge, ventes totales, montant acheté, tendance...) " +
+              "au lieu d'esquiver — les listes de produits et de fournisseurs sont déjà triées de la meilleure " +
+              "performance à la moins bonne, donc le dernier élément d'une liste en est le moins performant.\n\n" +
               "Réponds en français, de façon directe et structurée (phrases courtes ou puces), sans blabla " +
               "d'introduction. Base-toi uniquement sur les données ci-dessous, n'invente aucun chiffre.\n\n" +
               `Données de l'entreprise :\n${contexte}`,

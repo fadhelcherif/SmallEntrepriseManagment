@@ -1,0 +1,15 @@
+id,nom,prixAchat,prixVente,quantiteStock,seuilAlerte
+82c9b156-9e48-4772-b6a4-610f88eed060,T-shirt Basique,6.0,14.9,0,15
+eac55e82-4cf3-480b-8940-f858c7db0400,T-shirt Basique,6.0,14.9,4,15
+61fa2627-0c32-4b7e-867e-a04aaeaf12aa,T-shirt Basique,6.0,14.9,73,15
+2f9f7915-0f2d-4aa0-98fa-fbff272def4e,T-shirt Basique,6.0,14.9,0,15
+1d4729fb-527d-4107-b1d8-d718e7f64323,Jean Slim,18.0,44.9,11,8
+3cfcc465-ff37-402e-9c1b-ba5d3ea94f01,Jean Slim,18.0,44.9,80,8
+6807df5e-79b3-4b3d-ad75-2360dc5da848,Sweat à Capuche,15.0,39.9,90,10
+b1d3e895-75e6-42ad-a3f8-6bd8b9d22be8,Sweat à Capuche,15.0,39.9,48,10
+05c220e2-16b4-44dc-b5fd-5c6af2a0e444,Veste en Jean,22.0,54.9,97,6
+3d69487c-f6bf-4558-b7c5-86dfd5caedb4,Casquette,4.0,12.9,7,20
+dbee0582-7f92-49c0-b98d-beef835602c0,Ceinture Cuir,7.0,19.9,18,12
+4b036e43-3c29-4f80-bddb-d0b09c2ddfae,Écharpe Hiver,5.0,16.9,0,15
+80736db9-6fe9-46c5-b942-d8e6d8873264,Maillot de Bain,9.0,24.9,0,10
+394e86b1-2529-4787-99f0-efc1a9651537,Chaussettes (Lot de 3),3.0,9.9,115,25

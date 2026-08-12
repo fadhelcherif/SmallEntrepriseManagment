@@ -50,6 +50,18 @@ export type MembreEquipe = {
   salaire: number | null;
 };
 
+export type MoisChargeTendance = {
+  libelle: string;
+  montant: number;
+};
+
+export type AjustementStock = {
+  produitNom: string;
+  nouveauStock: number;
+  date: Date;
+  motif: string | null;
+};
+
 export type ContexteAssistant = {
   nomEntreprise: string;
   nombreProduits: number;
@@ -64,10 +76,13 @@ export type ContexteAssistant = {
   fournisseurs: FicheFournisseur[];
   commandesEnCours: number;
   tauxAnnulationCommandes: number;
+  ajustementsStock: AjustementStock[];
   finance?: {
     montantChargesDuMois: number;
     margeEstimee: number;
     chargesParType: FicheChargeParType[];
+    tendanceCharges: MoisChargeTendance[];
+    margeParMois: MoisChargeTendance[];
     equipe: MembreEquipe[];
   };
 };
@@ -95,6 +110,22 @@ export function construireContexteAssistant(contexte: ContexteAssistant): string
           `- ${charge.type} : ${charge.nombre} charge(s), montant total ${charge.montantTotal.toFixed(2)}` +
             (charge.recurrente ? " (récurrente)" : ""),
         );
+      }
+    }
+
+    if (contexte.finance.tendanceCharges.length > 0) {
+      lignes.push("Évolution mensuelle des charges (toutes catégories confondues), du plus ancien au plus récent :");
+      for (const mois of contexte.finance.tendanceCharges) {
+        lignes.push(`- ${mois.libelle} : ${mois.montant.toFixed(2)}`);
+      }
+    }
+
+    if (contexte.finance.margeParMois.length > 0) {
+      lignes.push(
+        "Marge mensuelle déjà calculée (ventes - charges, toutes charges confondues), du plus ancien au plus récent :",
+      );
+      for (const mois of contexte.finance.margeParMois) {
+        lignes.push(`- ${mois.libelle} : ${mois.montant.toFixed(2)}`);
       }
     }
 
@@ -126,8 +157,9 @@ export function construireContexteAssistant(contexte: ContexteAssistant): string
 
   if (contexte.catalogue.length > 0) {
     lignes.push(
-      "Catalogue complet (nom, attributs qui différencient le produit, prix d'achat, prix de vente, marge unitaire, " +
-        "marge %, stock, seuil d'alerte, ventes totales depuis toujours) :",
+      "Catalogue complet, trié du produit générant le plus de chiffre d'affaires au moins (le dernier de la liste " +
+        "est donc le moins vendu) — nom, attributs qui différencient le produit, prix d'achat, prix de vente, " +
+        "marge unitaire, marge %, stock, seuil d'alerte, ventes totales depuis toujours :",
     );
     for (const produit of contexte.catalogue) {
       lignes.push(
@@ -163,6 +195,16 @@ export function construireContexteAssistant(contexte: ContexteAssistant): string
     }
   }
 
+  if (contexte.ajustementsStock.length > 0) {
+    lignes.push("Ajustements manuels de stock récents (inventaires physiques, corrections) :");
+    for (const ajustement of contexte.ajustementsStock) {
+      lignes.push(
+        `- ${ajustement.produitNom} : nouveau stock ${ajustement.nouveauStock} le ${ajustement.date.toLocaleDateString("fr-FR")}` +
+          (ajustement.motif ? ` (${ajustement.motif})` : ""),
+      );
+    }
+  }
+
   if (contexte.alertes.length > 0) {
     lignes.push("Alertes de stock non lues :");
     for (const alerte of contexte.alertes) {
@@ -184,22 +226,24 @@ export function construireCatalogue(
   ventesParProduit: Map<string, ProduitVendu>,
   attributsAffichageParProduit: Map<string, string>,
 ): FicheProduit[] {
-  return produits.map((produit) => {
-    const margeUnitaire = produit.prixVente - produit.prixAchat;
-    const margePourcentage = produit.prixVente > 0 ? (margeUnitaire / produit.prixVente) * 100 : 0;
-    const ventes = ventesParProduit.get(produit.id);
+  return produits
+    .map((produit) => {
+      const margeUnitaire = produit.prixVente - produit.prixAchat;
+      const margePourcentage = produit.prixVente > 0 ? (margeUnitaire / produit.prixVente) * 100 : 0;
+      const ventes = ventesParProduit.get(produit.id);
 
-    return {
-      nom: produit.nom,
-      attributs: attributsAffichageParProduit.get(produit.id) ?? "",
-      prixAchat: produit.prixAchat,
-      prixVente: produit.prixVente,
-      margeUnitaire,
-      margePourcentage,
-      quantiteStock: produit.quantiteStock,
-      seuilAlerte: produit.seuilAlerte,
-      quantiteVendueTotale: ventes?.quantiteVendue ?? 0,
-      montantVenduTotal: ventes?.montantVendu ?? 0,
-    };
-  });
+      return {
+        nom: produit.nom,
+        attributs: attributsAffichageParProduit.get(produit.id) ?? "",
+        prixAchat: produit.prixAchat,
+        prixVente: produit.prixVente,
+        margeUnitaire,
+        margePourcentage,
+        quantiteStock: produit.quantiteStock,
+        seuilAlerte: produit.seuilAlerte,
+        quantiteVendueTotale: ventes?.quantiteVendue ?? 0,
+        montantVenduTotal: ventes?.montantVendu ?? 0,
+      };
+    })
+    .sort((a, b) => b.montantVenduTotal - a.montantVenduTotal);
 }

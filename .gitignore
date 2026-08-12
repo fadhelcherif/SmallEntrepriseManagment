@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# notebook (rapport de stage) — venv Python, pas de dependance de l'app
+notebooks/.venv
+notebooks/__pycache__
+notebooks/.ipynb_checkpoints
