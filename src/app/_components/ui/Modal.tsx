@@ -37,7 +37,7 @@ export function Modal({ open, onClose, title, description, children, large = fal
       <button type="button" aria-label="Fermer" onClick={onClose} className="absolute inset-0 bg-stone-900/40" />
 
       <div
-        className={`relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-lg border border-stone-200 bg-white p-6 shadow-xl ${large ? "max-w-3xl" : "max-w-lg"}`}
+        className={`relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-3xl border border-stone-200 bg-white p-6 shadow-xl ${large ? "max-w-3xl" : "max-w-lg"}`}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>

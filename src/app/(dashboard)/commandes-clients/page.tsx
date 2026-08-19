@@ -88,8 +88,6 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
     return true;
   });
 
-  const produitsParId = new Map(produits.map((produit) => [produit.id, produit.nom]));
-
   const attributsProduit = await listerAttributs(attributRepository, utilisateurConnecte.entrepriseId, ENTITE_CIBLE_PRODUIT);
   const valeursParProduit = grouperValeursParProduit(
     await listerValeursPourProduits(valeurAttributRepository, produits.map((produit) => produit.id)),
@@ -98,14 +96,17 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
     ...produit,
     attributsAffichage: formaterAttributsProduit(attributsProduit, valeursParProduit.get(produit.id)),
   }));
+  const produitsParId = new Map(
+    produitsAvecAttributs.map((produit) => [produit.id, produit.attributsAffichage ? `${produit.nom} (${produit.attributsAffichage})` : produit.nom]),
+  );
 
   const montantPeriode = calculerMontantCommandesActives(commandes);
   const groupesParJour = grouperCommandesParJour(commandes);
   const aujourdHui = cleJournaliere(new Date());
 
   return (
-    <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex w-full flex-col gap-6">
         <PageHeader
           title="Commandes clients"
           description="Création des ventes, validation, livraison et annulation des commandes clients."
@@ -142,7 +143,7 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
                     <details
                       key={groupe.cle}
                       open={groupe.cle === aujourdHui}
-                      className="group rounded-lg border border-stone-200 bg-white"
+                      className="group rounded-2xl border border-stone-200 bg-white"
                     >
                       <summary className="flex list-none cursor-pointer items-center justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden">
                         <span className="flex items-center gap-2">
@@ -163,7 +164,7 @@ export default async function CommandesClientsPage({ searchParams }: PageProps) 
                           const montantTotal = calculerMontantTotalCommande(commande.lignes);
 
                           return (
-                            <article key={commande.id} className="rounded-lg border border-stone-200 p-4">
+                            <article key={commande.id} className="rounded-2xl border border-stone-200 p-4">
                               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
                                   <div className="flex items-center gap-2 text-xs text-stone-500">

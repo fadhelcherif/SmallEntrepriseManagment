@@ -75,7 +75,9 @@ export default async function StockPage({ searchParams }: PageProps) {
     attributsAffichage: formaterAttributsProduit(attributsProduit, valeursParProduit.get(produit.id)),
   }));
 
-  const produitsParId = new Map(produits.map((produit) => [produit.id, produit.nom]));
+  const produitsParId = new Map(
+    produitsAvecAttributs.map((produit) => [produit.id, produit.attributsAffichage ? `${produit.nom} (${produit.attributsAffichage})` : produit.nom]),
+  );
   const utilisateursParId = new Map(utilisateurs.map((utilisateur) => [utilisateur.id, utilisateur.nom]));
 
   const mouvementsParProduit = new Map<string, MouvementAffichage[]>();
@@ -119,8 +121,8 @@ export default async function StockPage({ searchParams }: PageProps) {
   const filtreActif = Boolean(du || au || produitId || type);
 
   return (
-    <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex w-full flex-col gap-6">
         <PageHeader
           title="Stock"
           description="Niveau de stock de tous les produits, et historique des mouvements sur demande."
@@ -140,7 +142,7 @@ export default async function StockPage({ searchParams }: PageProps) {
               description="Ajoute des produits depuis l'écran Produits pour suivre leur stock ici."
             />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-stone-200">
+            <div className="overflow-x-auto rounded-2xl border border-stone-200">
               <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
                 <thead className="bg-stone-50 text-stone-500">
                   <tr>
@@ -186,7 +188,7 @@ export default async function StockPage({ searchParams }: PageProps) {
                         ))}
                         <td className="px-4 py-3 text-right">
                           <HistoriqueProduitBouton
-                            produitNom={produit.nom}
+                            produitNom={produitsParId.get(produit.id) ?? produit.nom}
                             mouvements={mouvementsParProduit.get(produit.id) ?? []}
                           />
                         </td>
@@ -199,7 +201,7 @@ export default async function StockPage({ searchParams }: PageProps) {
           )}
         </Panel>
 
-        <details open={filtreActif} className="group rounded-lg border border-stone-200 bg-white shadow-sm">
+        <details open={filtreActif} className="shadow-card group rounded-2xl border border-stone-200 bg-white">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-6 py-4 [&::-webkit-details-marker]:hidden">
             <ChevronRight className="h-4 w-4 shrink-0 text-stone-400 transition-transform group-open:rotate-90" strokeWidth={1.75} />
             <span className="font-heading text-lg font-semibold text-stone-900">Historique des mouvements</span>
@@ -220,7 +222,7 @@ export default async function StockPage({ searchParams }: PageProps) {
                 }
               />
             ) : (
-              <div className="overflow-x-auto rounded-lg border border-stone-200">
+              <div className="overflow-x-auto rounded-2xl border border-stone-200">
                 <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
                   <thead className="bg-stone-50 text-stone-500">
                     <tr>

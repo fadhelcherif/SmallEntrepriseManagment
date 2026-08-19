@@ -217,10 +217,6 @@ export function construireContexteAssistant(contexte: ContexteAssistant): string
   return lignes.join("\n");
 }
 
-export function nomsProduitsParId(produits: Produit[]): Map<string, string> {
-  return new Map(produits.map((produit) => [produit.id, produit.nom]));
-}
-
 export function construireCatalogue(
   produits: Produit[],
   ventesParProduit: Map<string, ProduitVendu>,

@@ -168,10 +168,11 @@ model Commande {
   statut        StatutCommande @default(BROUILLON)
   dateCommande  DateTime       @default(now())
 
-  entreprise     Entreprise      @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
-  utilisateur    Utilisateur     @relation(fields: [utilisateurId], references: [id])
-  fournisseur    Fournisseur?    @relation(fields: [fournisseurId], references: [id])
-  lignesCommande LigneCommande[]
+  entreprise             Entreprise                   @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  utilisateur            Utilisateur                  @relation(fields: [utilisateurId], references: [id])
+  fournisseur            Fournisseur?                 @relation(fields: [fournisseurId], references: [id])
+  lignesCommande         LigneCommande[]
+  tokensConfirmation     TokenConfirmationCommande[]
 
   @@index([entrepriseId])
   @@index([fournisseurId])
@@ -191,6 +192,22 @@ model LigneCommande {
   @@index([commandeId])
   @@index([produitId])
   @@map("lignes_commande")
+}
+
+/// Lien public (sans compte) envoye par email au fournisseur lors de la creation d'une
+/// commande achat, pour qu'il puisse consulter le detail de la commande. Consultable a
+/// volonte jusqu'a expiration (pas a usage unique, contrairement au token de mot de passe).
+model TokenConfirmationCommande {
+  id             String   @id @default(uuid())
+  commandeId     String
+  token          String   @unique
+  dateExpiration DateTime
+  dateCreation   DateTime @default(now())
+
+  commande Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+
+  @@index([commandeId])
+  @@map("tokens_confirmation_commande")
 }
 
 // ---------- Stock ----------

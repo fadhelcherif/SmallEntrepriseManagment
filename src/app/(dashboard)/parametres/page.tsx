@@ -26,8 +26,8 @@ export default async function ParametresPage() {
   }
 
   return (
-    <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex w-full flex-col gap-6">
         <PageHeader
           title="Paramètres de l'entreprise"
           description="Mise à jour des informations de base et de l'identité visuelle de l'entreprise."

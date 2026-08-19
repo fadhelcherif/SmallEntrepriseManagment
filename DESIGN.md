@@ -3,84 +3,100 @@
 ## Objectif
 
 L'application doit avoir l'air d'un vrai produit professionnel concu par
-une equipe design, pas d'un prototype genere par une IA. Cette direction a
-ete definie a partir de captures d'ecran d'une vraie application
-professionnelle (back-office de gestion), adaptees a l'identite et aux
-donnees propres a Vantik — aucun contenu ni logique metier n'a ete copie,
-seulement le langage visuel (couleurs, formes, typographie, structure).
+une equipe design, pas d'un prototype genere par une IA. Cette direction
+(v2) a ete definie a partir d'une capture d'ecran d'une vraie application
+fintech professionnelle, adaptee a l'identite et aux donnees propres a
+Vantik — aucun contenu ni logique metier n'a ete copie, seulement le
+langage visuel (couleurs, formes, typographie, structure). Elle remplace
+la direction v1 (barre laterale sombre, cartes plates sans ombre) — voir
+l'historique git de ce fichier si besoin de retrouver l'ancienne version.
 
 ## Structure generale
 
-- **Barre laterale sombre** (`bg-stone-900`), fixe a gauche, largeur
-  `lg:w-64`. Contient : le mot "Vantik" (texte seul, pas d'avatar/logo
-  dans la sidebar — l'identite visuelle avec avatar vit dans la barre
-  d'en-tete, pas ici), le nom de l'entreprise en petit, puis la
-  navigation, puis le bouton de deconnexion en bas.
-  - Cette couleur sombre est fixe (pas liee a la couleur de l'entreprise)
-    — c'est la structure de l'appli, pas sa marque.
-  - Navigation : chaque lien a une icone dans un petit cercle (`h-8 w-8
-    rounded-full border`). Au repos, cercle avec juste une bordure fine
-    grise, icone grise. Actif : le cercle se remplit de la couleur de
-    marque, l'icone devient blanche, le label passe de gris a blanc.
-    **Jamais de fond de ligne ni de barre laterale coloree pour l'etat
-    actif** — ce pattern (fond + bordure gauche) est trop generique/
-    "shadcn par defaut", on s'en ecarte volontairement.
-- **Barre d'en-tete persistante** (carte blanche en haut de la zone de
-  contenu, sur toutes les pages du dashboard) : avatar rond de
-  l'entreprise, nom de l'entreprise, badge de role (Administrateur /
-  Employe), puis a droite le nom de l'utilisateur, une icone reglages
-  (admin seulement, vers /parametres) et une icone alertes avec un badge
-  rouge de comptage (voir `CompteurBadge`).
+- **Barre laterale claire** (`bg-white`), fixe a gauche, largeur `lg:w-60`.
+  Contient, du haut vers le bas : le logo/l'identite de l'entreprise
+  (logo uploade ou initiale dans un badge `rounded-2xl` de la couleur de
+  marque, avec le nom de l'entreprise en gras et "Vantik" en petit
+  dessous), la navigation, puis en bas une carte sombre d'appel a
+  l'assistant IA (`bg-[#1c1917]`, `rounded-2xl`) et le bouton de
+  deconnexion.
+  - C'est l'identite de l'ENTREPRISE cliente qui est mise en avant ici
+    (comme un espace de travail dans un outil SaaS classique), pas celle
+    de Vantik — Vantik reste en petit, en signature.
+  - Navigation : pilules pleine largeur (`rounded-full`). Actif : fond
+    plein de la couleur de marque, texte blanc, `font-semibold`. Inactif :
+    texte `stone-500`, fond transparent, `hover:bg-stone-50`.
+- **Barre d'en-tete** (au-dessus du contenu, sur toutes les pages) :
+  identite de l'UTILISATEUR connecte (avatar generique rond + "Bienvenue"
+  + son nom), puis a droite le badge de role (Administrateur / Employe)
+  et des boutons icone ronds (`rounded-full`, fond blanc, bordure fine,
+  `shadow-card`) pour les reglages (admin) et les alertes (badge de
+  comptage rouge, voir `CompteurBadge`).
+  - L'identite entreprise vit dans la sidebar, l'identite utilisateur
+    dans l'en-tete — jamais les deux au meme endroit (pas de duplication).
 - **En-tete de page** (`PageHeader`) : titre en gras avec une petite barre
-  verticale de couleur primaire a gauche (pas de degrade, pas d'eyebrow
-  redondant avec la barre d'en-tete globale), description courte,
-  actions a droite.
+  verticale de couleur primaire a gauche, description courte, actions a
+  droite.
+- **Largeur de page** : pas de `max-w` sur le conteneur de contenu (juste
+  `px-5 sm:px-8`) — le contenu remplit l'espace disponible a cote de la
+  sidebar plutot que de laisser un vide a droite sur grand ecran.
 
 ## Couleurs
 
 - `--color-primary` / `--color-secondary` : couleur de marque de
   l'entreprise (personnalisable dans /parametres), valeur par defaut un
   rouge (`#d64a3c`) si l'entreprise n'a rien choisi. Utilisee pour : les
-  boutons primaires, les icones actives de la navigation, les badges
-  "info", les cercles d'icone des cartes de statistiques.
-  - Elle ne pilote jamais la couleur de la barre laterale (toujours
-    sombre) ni les couleurs semantiques (succes/erreur/avertissement).
+  boutons primaires, l'etat actif de la navigation (fond plein de la
+  pilule), les cercles d'icone des cartes de statistiques, le badge de
+  l'assistant IA.
+  - Elle ne pilote jamais les couleurs semantiques (succes/erreur/
+    avertissement) ni la couleur de la carte d'appel a l'assistant
+    (toujours sombre, `#1c1917`).
 - Semantique fixe (jamais liee a la marque) : `emerald` = succes/positif,
-  `red` = danger/negatif, `amber` = avertissement, `stone` = neutre. Un
-  bouton "Supprimer" reste rouge meme si la couleur de marque de
-  l'entreprise est aussi rouge — la forme (contour vs plein) differencie
-  les deux au besoin.
-- Fond de page : gris clair (`--color-surface`, teinte tres legerement
-  par la couleur de marque), jamais blanc pur — les cartes blanches
-  ressortent dessus.
+  `red` = danger/negatif, `amber` = avertissement, `stone` = neutre.
+- Variete pastel pour les badges d'icone des cartes de statistiques
+  (`StatCard`, prop `couleur`) : chaque carte peut avoir sa propre teinte
+  (ambre, bleu ciel, violet, rose...) pour distinguer visuellement
+  plusieurs metriques cote a cote sur un tableau de bord — ce n'est pas
+  la couleur de marque, juste une palette decorative fixe.
+- Fond de page : creme chaud (`--color-surface`, `#f6f2ea` teinte
+  legerement par la couleur de marque), jamais blanc pur — les cartes
+  blanches ressortent dessus.
 
 ## Typographie
 
-- Une seule famille : Public Sans, en plusieurs graisses (300 a 800). Pas
-  de police serif — la hierarchie se fait par le poids et la taille, pas
-  par un changement de police.
+- Une seule famille : Plus Jakarta Sans, en plusieurs graisses (300 a
+  800). Pas de police serif — la hierarchie se fait par le poids et la
+  taille, pas par un changement de police.
 - Titres de page/section : gras (`font-bold`), taille clairement
   superieure au corps de texte.
-- Petits labels (navigation, boutons, badges) : `text-xs`/`text-[11px]`,
-  `uppercase`, `tracking-wide`, `font-semibold` — c'est la signature
-  typographique de cette direction, a garder partout ou un label est
-  court (2-3 mots max ; jamais sur une phrase complete ou un paragraphe).
+- Petits labels (badges, boutons) : `text-xs`/`text-[11px]`, `uppercase`,
+  `tracking-wide`, `font-semibold` pour les badges de statut et les
+  boutons. Les labels de navigation restent en casse normale, taille
+  `text-sm`, `font-medium` (pas de majuscules dans la sidebar v2).
 
 ## Formes
 
 - Boutons : forme de pilule (`rounded-full`), jamais de coins carres ou
-  peu arrondis.
-- Cartes/panels/en-tetes/etats vides : `rounded-lg` (rayon modere, pas
-  bulbeux), fond blanc, bordure fine `stone-200`, **pas d'ombre**
-  (`shadow-sm`/`shadow-lg` partout est le tic visuel le plus reconnaissable
-  d'un dashboard genere par IA — ici on s'appuie sur la bordure fine, pas
-  sur l'elevation, pour delimiter les blocs). Seule la modale garde une
-  ombre (`shadow-xl`) — elle flotte reellement au-dessus du contenu, donc
-  l'elevation y a un sens.
+  peu arrondis. Petits boutons d'action (icone seule dans un tableau,
+  ex. modifier/supprimer une ligne) : `rounded-md`, taille reduite —
+  c'est la seule exception a la pilule, reservee aux actions secondaires
+  denses dans des listes.
+- Cartes/panels/en-tetes/etats vides (`Panel`, `StatCard`, `PageHeader`,
+  `EmptyState`) : `rounded-3xl`, fond blanc, **`shadow-card`** (ombre
+  douce et diffuse definie dans `globals.css` — pas les ombres Tailwind
+  par defaut `shadow-sm`/`shadow-lg`, trop dures). Badges d'icone dans
+  les `StatCard` : `rounded-2xl`.
+  - Elements imbriques dans une carte deja ombragee (tableaux, cartes de
+    liste) : `rounded-2xl border border-stone-200`, sans ombre propre —
+    l'ombre reste reservee aux conteneurs de premier niveau, pour ne pas
+    empiler les elevations.
+  - La modale (`Modal`) garde `shadow-xl` (plus marquee que `shadow-card`)
+    et `rounded-3xl` — elle flotte reellement au-dessus du contenu.
 - Badges de statut : pilules `rounded-full`, texte petit et en
   majuscules.
-- Champs de formulaire : `rounded-lg`, bordure fine, anneau de focus dans
-  la couleur de marque.
+- Champs de formulaire : `rounded-xl`, bordure fine, anneau de focus
+  dans la couleur de marque.
 
 ## A eviter absolument (les "tics" visuels d'IA generique)
 
@@ -95,15 +111,12 @@ seulement le langage visuel (couleurs, formes, typographie, structure).
   horizontalement dans la page donne un look "landing page generee".
 - Melanger les formes de boutons (pilule ici, rectangle arrondi la) —
   une fois la forme choisie, elle est fixe partout.
-- Ombre + coins tres arrondis sur chaque carte (`rounded-2xl shadow-lg`) :
-  c'est la signature visuelle des templates de dashboard generes par IA.
-  Prefere une bordure fine sans ombre, rayon modere.
-- Etat actif de navigation en fond de ligne pleine largeur + barre
-  laterale coloree : trop "composant par defaut d'une librairie UI". Une
-  icone qui change d'etat (contour → rempli) est plus sobre et distinctif.
+- Ombre Tailwind par defaut (`shadow-md`/`shadow-lg` bruts) sur les
+  cartes — toujours passer par le token `shadow-card` (plus douce,
+  plus diffuse), jamais les valeurs par defaut qui ont un bord trop net.
 - Avatar/logo duplique a deux endroits (barre laterale ET en-tete) —
-  l'identite visuelle globale (avatar, nom d'entreprise) vit a un seul
-  endroit (la barre d'en-tete), la barre laterale reste texte seul.
+  l'identite entreprise vit dans la sidebar, l'identite utilisateur dans
+  l'en-tete ; jamais les deux memes avatars aux deux endroits.
 
 ## Densite d'information
 
@@ -126,7 +139,7 @@ consomme par les pages.
 ## Instruction pour Claude
 
 Avant de creer ou modifier une interface, decris en une phrase la
-direction visuelle que tu vas prendre (ex : "bouton pilule plein avec la
-couleur primaire de l'entreprise, carte `rounded-2xl` blanche") et
+direction visuelle que tu vas prendre (ex : "carte `rounded-3xl` blanche
+avec `shadow-card`, badge d'icone `rounded-2xl` en couleur pastel") et
 verifie qu'elle correspond a ce document avant d'ecrire le code. Si tu
 introduis un nouveau composant visuel, mets-le a jour ici.

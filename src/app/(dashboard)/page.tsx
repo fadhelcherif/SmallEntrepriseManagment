@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BellRing, ClipboardList, Package, Truck, Trophy, TrendingUp, ShoppingCart, Warehouse, PiggyBank, Bot, ArrowRight } from "lucide-react";
+import { BellRing, ClipboardList, Package, Truck, Trophy, TrendingUp, ShoppingCart, Warehouse, PiggyBank, ArrowRight, type LucideIcon } from "lucide-react";
 
 import { listerAlertes } from "../../application/alertes/listerAlertes";
 import { listerCommandes } from "../../application/commandes/listerCommandes";
@@ -110,6 +110,8 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
     commandeRepository,
     chargeRepository,
     fournisseurRepository,
+    attributRepository,
+    valeurAttributRepository,
     utilisateurConnecte.entrepriseId,
     estAdministrateur,
   );
@@ -206,118 +208,127 @@ export default async function AccueilDashboardPage({ searchParams }: PageProps) 
     </Panel>
   );
 
+  const statsMois: { icon: LucideIcon; label: string; valeur: number; couleur: string }[] = [
+    { icon: TrendingUp, label: "Ventes livrées", valeur: montantVentesDuMois, couleur: "#10b981" },
+    { icon: ShoppingCart, label: "Achats reçus", valeur: montantAchatsDuMois, couleur: "#f59e0b" },
+    { icon: Warehouse, label: "Valeur du stock", valeur: valeurStock, couleur: "#0ea5e9" },
+  ];
+
   return (
-    <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={Package} label="Produits" value={produits.length} hint="Références au catalogue" />
-          <StatCard icon={Truck} label="Fournisseurs" value={fournisseurs.length} hint="Partenaires actifs" />
-          <StatCard icon={ClipboardList} label="Commandes en cours" value={commandesEnCours} hint="Brouillons et validées" />
-          <StatCard icon={BellRing} label="Alertes non lues" value={alertes.length} hint="À traiter" />
-        </section>
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex w-full flex-col gap-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="font-heading text-2xl font-bold text-stone-900">Tableau de bord</p>
+            <p className="mt-1 text-sm text-stone-500">Vue d&apos;ensemble de ton activité.</p>
+          </div>
+          <FiltreMois mois={moisValeurInput} estMoisCourant={estMoisCourant} />
+        </div>
 
-        <Link
-          href="/assistant"
-          className="group flex items-center justify-between gap-4 rounded-lg p-6 transition hover:opacity-95"
-          style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
-        >
-          <div className="flex items-center gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15">
-              <Bot className="h-6 w-6" strokeWidth={1.75} />
-            </span>
-            <div>
-              <p className="font-heading text-base font-bold">Besoin de conseils ?</p>
-              <p className="mt-0.5 text-sm opacity-80">Demande à l&apos;assistant Vantik — basé sur tes vraies données.</p>
+        <div className="grid gap-5 lg:grid-cols-4">
+          <StatCard icon={Package} label="Produits" value={produits.length} hint="Références au catalogue" couleur="#f59e0b" />
+          <StatCard icon={Truck} label="Fournisseurs" value={fournisseurs.length} hint="Partenaires actifs" couleur="#0ea5e9" />
+          <StatCard icon={ClipboardList} label="Commandes en cours" value={commandesEnCours} hint="Brouillons et validées" couleur="#8b5cf6" />
+          <StatCard icon={BellRing} label="Alertes non lues" value={alertes.length} hint="À traiter" couleur="#f43f5e" />
+
+          {!rapportPrevisions.chiffreAffaires.historiqueInsuffisant ? (
+            <div className="lg:col-span-3">
+              <Panel
+                title="Prévisions"
+                description="Chiffre d'affaires réel et prévu, 3 prochains mois."
+                actions={
+                  <Link
+                    href="/previsions"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 px-3.5 py-1.5 text-xs font-semibold text-stone-600 transition hover:border-stone-300 hover:text-stone-900"
+                  >
+                    Rapport complet
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+                  </Link>
+                }
+              >
+                <GraphiqueBarresPrevision points={rapportPrevisions.chiffreAffaires.courbe} hauteur={140} />
+              </Panel>
             </div>
-          </div>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 transition group-hover:translate-x-0.5">
-            <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-          </span>
-        </Link>
+          ) : null}
 
-        {!rapportPrevisions.chiffreAffaires.historiqueInsuffisant ? (
-          <Panel
-            title="Prévisions"
-            description="Chiffre d'affaires réel et prévu, 3 prochains mois."
-            actions={
-              <Link href="/previsions" className="text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 hover:text-stone-900">
-                Voir le rapport complet
-              </Link>
-            }
-          >
-            <GraphiqueBarresPrevision points={rapportPrevisions.chiffreAffaires.courbe} hauteur={140} />
-          </Panel>
-        ) : null}
-
-        <FiltreMois mois={moisValeurInput} estMoisCourant={estMoisCourant} />
-
-        <Panel title="Ce mois-ci" description={formaterNomMois(moisSelectionne)}>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icon={TrendingUp} label="Ventes livrées" value={montantVentesDuMois.toFixed(2)} hint="Commandes clients reçues" couleur="#10b981" />
-            <StatCard icon={ShoppingCart} label="Achats reçus" value={montantAchatsDuMois.toFixed(2)} hint="Commandes fournisseurs reçues" couleur="#f59e0b" />
-            <StatCard icon={Warehouse} label="Valeur du stock" value={valeurStock.toFixed(2)} hint="Stock actuel au prix d'achat" couleur="#0ea5e9" />
-          </div>
-        </Panel>
-
-        {estAdministrateur && segmentsRepartition ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Panel title="Répartition des ventes du mois" description="D'où vient l'argent, où il part.">
-              {montantVentesDuMois <= 0 && (montantChargesDuMois ?? 0) <= 0 ? (
-                <EmptyState
-                  icon={PiggyBank}
-                  title="Aucune donnée financière ce mois-ci"
-                  description="La répartition apparaîtra ici dès qu'il y aura des ventes livrées ou des charges enregistrées."
-                />
-              ) : (
-                <>
-                  <GraphiqueDonut
-                    segments={segmentsRepartition}
-                    centreLabel="Bénéfice"
-                    centreValeur={(margeEstimee ?? 0).toFixed(2)}
-                    centreCouleur={(margeEstimee ?? 0) < 0 ? "#dc2626" : "#10b981"}
-                  />
-                  {(margeEstimee ?? 0) < 0 ? (
-                    <p className="mt-4 text-sm font-medium text-red-600">
-                      Les charges dépassent les ventes livrées ce mois-ci.
-                    </p>
-                  ) : null}
-                </>
-              )}
-            </Panel>
-
-            {panneauVentesParProduit}
-          </div>
-        ) : (
-          panneauVentesParProduit
-        )}
-
-        <Panel
-          title="Alertes récentes"
-          description={`${alertes.length} alerte(s) non lue(s) au total.`}
-          actions={
-            <Link href="/alertes" className="text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 hover:text-stone-900">
-              Voir toutes les alertes
-            </Link>
-          }
-        >
-          {alertesRecentes.length === 0 ? (
-            <EmptyState
-              icon={BellRing}
-              title="Aucune alerte non lue"
-              description="Tout est sous contrôle : les alertes de stock ou d'expiration apparaîtront ici."
-            />
-          ) : (
-            <div className="grid gap-3">
-              {alertesRecentes.map((alerte) => (
-                <article key={alerte.id} className="rounded-lg border border-stone-200 bg-stone-50 p-4">
-                  <p className="text-sm font-semibold text-stone-900">{alerte.type}</p>
-                  <p className="mt-1 text-sm text-stone-700">{alerte.message}</p>
-                  <p className="mt-2 text-xs text-stone-500">{formaterDate(alerte.dateGeneration)}</p>
-                </article>
+          <Panel title="Ce mois-ci" description={formaterNomMois(moisSelectionne)}>
+            <div className="flex flex-col gap-4">
+              {statsMois.map((stat) => (
+                <div key={stat.label} className="flex items-center gap-3">
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: `color-mix(in srgb, ${stat.couleur} 16%, white)`, color: stat.couleur }}
+                  >
+                    <stat.icon className="h-5 w-5" strokeWidth={1.75} />
+                  </span>
+                  <p className="min-w-0 flex-1 truncate text-sm text-stone-500">{stat.label}</p>
+                  <p className="font-heading text-sm font-bold text-stone-900">{stat.valeur.toFixed(2)}</p>
+                </div>
               ))}
             </div>
-          )}
-        </Panel>
+          </Panel>
+
+          {estAdministrateur && segmentsRepartition ? (
+            <div className="lg:col-span-2">
+              <Panel title="Répartition des ventes du mois" description="D'où vient l'argent, où il part.">
+                {montantVentesDuMois <= 0 && (montantChargesDuMois ?? 0) <= 0 ? (
+                  <EmptyState
+                    icon={PiggyBank}
+                    title="Aucune donnée financière ce mois-ci"
+                    description="La répartition apparaîtra ici dès qu'il y aura des ventes livrées ou des charges enregistrées."
+                  />
+                ) : (
+                  <>
+                    <GraphiqueDonut
+                      segments={segmentsRepartition}
+                      centreLabel="Bénéfice"
+                      centreValeur={(margeEstimee ?? 0).toFixed(2)}
+                      centreCouleur={(margeEstimee ?? 0) < 0 ? "#dc2626" : "#10b981"}
+                    />
+                    {(margeEstimee ?? 0) < 0 ? (
+                      <p className="mt-4 text-sm font-medium text-red-600">Les charges dépassent les ventes livrées ce mois-ci.</p>
+                    ) : null}
+                  </>
+                )}
+              </Panel>
+            </div>
+          ) : null}
+
+          <div className={estAdministrateur && segmentsRepartition ? "lg:col-span-2" : "lg:col-span-4"}>{panneauVentesParProduit}</div>
+
+          <div className="lg:col-span-4">
+            <Panel
+              title="Alertes récentes"
+              description={`${alertes.length} alerte(s) non lue(s) au total.`}
+              actions={
+                <Link
+                  href="/alertes"
+                  className="text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 hover:text-stone-900"
+                >
+                  Voir toutes les alertes
+                </Link>
+              }
+            >
+              {alertesRecentes.length === 0 ? (
+                <EmptyState
+                  icon={BellRing}
+                  title="Aucune alerte non lue"
+                  description="Tout est sous contrôle : les alertes de stock ou d'expiration apparaîtront ici."
+                />
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {alertesRecentes.map((alerte) => (
+                    <article key={alerte.id} className="rounded-2xl bg-stone-50 p-4">
+                      <p className="text-sm font-semibold text-stone-900">{alerte.type}</p>
+                      <p className="mt-1 text-sm text-stone-700">{alerte.message}</p>
+                      <p className="mt-2 text-xs text-stone-500">{formaterDate(alerte.dateGeneration)}</p>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </Panel>
+          </div>
+        </div>
       </div>
     </main>
   );

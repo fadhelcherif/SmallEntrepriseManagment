@@ -28,8 +28,8 @@ export default async function UtilisateursPage() {
   const utilisateurs = await listerUtilisateurs(repository, utilisateurConnecte.entrepriseId);
 
   return (
-    <main className="px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex w-full flex-col gap-6">
         <PageHeader
           title="Utilisateurs"
           description="Gestion des membres de l'équipe. Réservé aux administrateurs."
@@ -46,7 +46,7 @@ export default async function UtilisateursPage() {
                 description="Ajoute ton premier employé avec le formulaire à gauche."
               />
             ) : (
-              <div className="overflow-hidden rounded-lg border border-stone-200">
+              <div className="overflow-hidden rounded-2xl border border-stone-200">
                 <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
                   <thead className="bg-stone-50 text-stone-500">
                     <tr>

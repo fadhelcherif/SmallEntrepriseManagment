@@ -85,11 +85,8 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
   }
 
   return (
-    <div className="flex h-full min-h-0 gap-4">
-      <aside
-        className="hidden w-64 shrink-0 flex-col border-r-2 pr-4 md:flex"
-        style={{ borderColor: "var(--color-primary)" }}
-      >
+    <div className="shadow-card flex h-full min-h-0 overflow-hidden rounded-3xl bg-white">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-stone-100 bg-stone-50/60 p-4 md:flex">
         <Link
           href="/assistant"
           className="mb-3 inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
@@ -103,7 +100,7 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
           {sessions.length === 0 ? (
             <p className="px-3 py-2 text-xs text-stone-400">Aucune conversation pour l&apos;instant.</p>
           ) : (
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-1">
               {sessions.map((session) => {
                 const estActive = session.id === sessionIdActif;
 
@@ -111,12 +108,13 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
                   <div key={session.id} className="group relative">
                     <Link
                       href={`/assistant/${session.id}`}
-                      className={`block rounded-md px-3 py-2 pr-8 transition ${estActive ? "bg-stone-100" : "hover:bg-stone-50"}`}
+                      className={`block rounded-2xl px-3 py-2.5 pr-8 transition ${estActive ? "font-semibold text-white" : "text-stone-600 hover:bg-white"}`}
+                      style={estActive ? { backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" } : undefined}
                     >
-                      <p className={`truncate text-sm ${estActive ? "font-medium text-stone-900" : "text-stone-700"}`}>
-                        {session.titre}
+                      <p className="truncate text-sm">{session.titre}</p>
+                      <p className={`text-[11px] ${estActive ? "text-white/70" : "text-stone-400"}`}>
+                        {formaterDateRelative(session.derniereActivite)}
                       </p>
-                      <p className="text-[11px] text-stone-400">{formaterDateRelative(session.derniereActivite)}</p>
                     </Link>
                     <form
                       action={supprimerSessionAction.bind(null, entrepriseId, utilisateurId, session.id)}
@@ -126,7 +124,7 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
                         type="submit"
                         aria-label="Supprimer la conversation"
                         title="Supprimer la conversation"
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-stone-400 transition hover:bg-red-50 hover:text-red-600"
+                        className={`flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-red-50 hover:text-red-600 ${estActive ? "text-white/70" : "text-stone-400"}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
                       </button>
@@ -139,8 +137,8 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
         </div>
       </aside>
 
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex items-center gap-3 border-b border-stone-200 pb-4">
+      <div className="flex min-h-0 flex-1 flex-col p-6">
+        <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
             style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
@@ -229,7 +227,7 @@ export function AssistantChat({ entrepriseId, utilisateurId, sessions, sessionAc
             value={valeurQuestion}
             onChange={(evenement) => setValeurQuestion(evenement.target.value)}
             onKeyDown={surAppuiTouche}
-            className="min-h-11 flex-1 resize-none rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/15"
+            className="min-h-11 flex-1 resize-none rounded-2xl border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/15"
             placeholder="Écris ta question... (Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne)"
           />
           <button

@@ -11,7 +11,7 @@ type PanelProps = {
 
 export function Panel({ id, title, description, actions, children, className = "" }: PanelProps) {
   return (
-    <section id={id} className={`rounded-lg border border-stone-200 bg-white p-6 ${className}`}>
+    <section id={id} className={`shadow-card rounded-3xl bg-white p-6 ${className}`}>
       {title ? (
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>

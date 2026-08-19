@@ -43,8 +43,8 @@ export default async function SessionAssistantPage({ params }: PageProps) {
   }
 
   return (
-    <main className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex h-[calc(100vh-140px)] w-full max-w-6xl flex-col">
+    <main className="px-5 py-6 sm:px-8">
+      <div className="flex h-[calc(100vh-140px)] w-full flex-col">
         <AssistantChat
           entrepriseId={utilisateurConnecte.entrepriseId}
           utilisateurId={utilisateurConnecte.id}

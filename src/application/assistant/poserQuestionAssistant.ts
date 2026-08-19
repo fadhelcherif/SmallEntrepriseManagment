@@ -22,7 +22,6 @@ import { formaterAttributsProduit, grouperValeursParProduit } from "../../domain
 import {
   construireCatalogue,
   construireContexteAssistant,
-  nomsProduitsParId,
   type AjustementStock,
   type FicheChargeParType,
   type FicheFournisseur,
@@ -191,7 +190,12 @@ export async function poserQuestionAssistant(
     ]),
   );
 
-  const nomsProduits = nomsProduitsParId(produits);
+  const nomsProduits = new Map(
+    produits.map((produit) => {
+      const attributsAffichage = attributsAffichageParProduit.get(produit.id) ?? "";
+      return [produit.id, attributsAffichage ? `${produit.nom} (${attributsAffichage})` : produit.nom];
+    }),
+  );
 
   const ajustementsStock: AjustementStock[] = mouvements
     .filter((mouvement) => mouvement.type === "AJUSTEMENT")

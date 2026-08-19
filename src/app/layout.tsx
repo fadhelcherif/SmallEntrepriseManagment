@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Public_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const fontCorps = Public_Sans({
-  variable: "--font-public-sans",
+const fontCorps = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
 });

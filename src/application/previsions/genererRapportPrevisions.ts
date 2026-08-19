@@ -1,13 +1,19 @@
+import type { AttributPersonnaliseRepository } from "../../domain/repositories/AttributPersonnaliseRepository";
 import type { ChargeRepository } from "../../domain/repositories/ChargeRepository";
 import type { CommandeRepository } from "../../domain/repositories/CommandeRepository";
 import type { FournisseurRepository } from "../../domain/repositories/FournisseurRepository";
 import type { ProduitRepository } from "../../domain/repositories/ProduitRepository";
+import type { ValeurAttributRepository } from "../../domain/repositories/ValeurAttributRepository";
+import { ENTITE_CIBLE_PRODUIT } from "../../domain/entities/AttributPersonnalise";
 import { calculerMontantTotalCommande } from "../../domain/services/calculerMontantCommande";
+import { formaterAttributsProduit, grouperValeursParProduit } from "../../domain/services/formaterAttributsProduit";
 import { calculerQuantiteACommander } from "../../domain/services/previsions/calculerQuantiteACommander";
 import { choisirMeilleurModele, type NiveauConfiance, type NomModele } from "../../domain/services/previsions/choisirMeilleurModele";
 import { evaluerRisquePerte, type NiveauRisque } from "../../domain/services/previsions/evaluerRisquePerte";
 import { recommanderInvestissement } from "../../domain/services/previsions/recommanderInvestissement";
 import { choisirMeilleurFournisseur, type StatsFournisseurProduit } from "../../domain/services/previsions/choisirMeilleurFournisseur";
+import { listerAttributs } from "../attributs/listerAttributs";
+import { listerValeursPourProduits } from "../attributs/listerValeursPourProduits";
 import { listerCharges } from "../charges/listerCharges";
 import { listerCommandes } from "../commandes/listerCommandes";
 import { listerFournisseurs } from "../fournisseurs/listerFournisseurs";
@@ -108,6 +114,8 @@ export async function genererRapportPrevisions(
   commandeRepository: CommandeRepository,
   chargeRepository: ChargeRepository,
   fournisseurRepository: FournisseurRepository,
+  attributRepository: AttributPersonnaliseRepository,
+  valeurAttributRepository: ValeurAttributRepository,
   entrepriseId: string,
   estAdministrateur: boolean,
 ): Promise<RapportPrevisions> {
@@ -118,6 +126,17 @@ export async function genererRapportPrevisions(
     listerCommandes(commandeRepository, entrepriseId),
     listerFournisseurs(fournisseurRepository, entrepriseId),
   ]);
+
+  const attributsProduit = await listerAttributs(attributRepository, entrepriseId, ENTITE_CIBLE_PRODUIT);
+  const valeursParProduit = grouperValeursParProduit(
+    await listerValeursPourProduits(valeurAttributRepository, produits.map((produit) => produit.id)),
+  );
+  const nomAffichageParProduit = new Map(
+    produits.map((produit) => {
+      const attributsAffichage = formaterAttributsProduit(attributsProduit, valeursParProduit.get(produit.id));
+      return [produit.id, attributsAffichage ? `${produit.nom} (${attributsAffichage})` : produit.nom];
+    }),
+  );
 
   const nomsFournisseurs = new Map(fournisseurs.map((fournisseur) => [fournisseur.id, fournisseur.nom]));
   const delaisFournisseurs = new Map(fournisseurs.map((fournisseur) => [fournisseur.id, fournisseur.delaiLivraisonJours ?? null]));
@@ -209,7 +228,7 @@ export async function genererRapportPrevisions(
 
     if (!selection) {
       return {
-        nom: produit.nom,
+        nom: nomAffichageParProduit.get(produit.id) ?? produit.nom,
         demandePrevueProchainMois: 0,
         quantiteACommander: 0,
         confiance: "FAIBLE",
@@ -226,7 +245,7 @@ export async function genererRapportPrevisions(
     const quantiteACommander = calculerQuantiteACommander(demandePrevue, produit.seuilAlerte, produit.quantiteStock, delaiLivraisonJours);
 
     return {
-      nom: produit.nom,
+      nom: nomAffichageParProduit.get(produit.id) ?? produit.nom,
       demandePrevueProchainMois: round2(demandePrevue),
       quantiteACommander,
       confiance: selection.confiance,

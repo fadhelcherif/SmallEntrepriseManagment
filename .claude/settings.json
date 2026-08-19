@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '$1>1')",
+      "Bash(awk -F'\\\\t' '$3==0 {print $1}' /tmp/import_counts.tsv)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\fadhe\\\\OneDrive\\\\Bureau\\\\SmallEntreprise\\\\vantik\\\\src\\\\app\\\\\\(auth\\)\\\\commande-fournisseur\\\\[token]\")",
+      "Bash(node check_fournisseurs.mjs)",
+      "Bash(mv test_email_flow.mjs test_email_flow.ts)",
+      "Bash(node --experimental-strip-types test_email_flow.ts)",
+      "Bash(npx --yes tsx test_email_flow.ts)",
+      "Bash(mv test_email_flow.ts test_email_flow.mts)",
+      "Bash(npx --yes tsx test_email_flow.mts)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\fadhe\\OneDrive\\Bureau\\SmallEntreprise\\vantik\\src\\app\\(auth)\\commande-fournisseur"
+    ]
+  }
+}

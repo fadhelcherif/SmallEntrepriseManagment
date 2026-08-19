@@ -57,6 +57,6 @@ export function variablesThemeEntreprise(entreprise?: EntrepriseCouleurs | null)
     "--color-primary-foreground": texteLisibleSur(primaire),
     "--color-secondary": secondaire,
     "--color-secondary-foreground": texteLisibleSur(secondaire),
-    "--color-surface": `color-mix(in srgb, ${primaire} 5%, #ececea)`,
+    "--color-surface": `color-mix(in srgb, ${primaire} 5%, #f6f2ea)`,
   };
 }

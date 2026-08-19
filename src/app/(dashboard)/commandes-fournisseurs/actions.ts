@@ -3,19 +3,22 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "../../../infrastructure/db";
-import { creerCommande } from "../../../application/commandes/creerCommande";
+import { creerCommandeFournisseur } from "../../../application/commandes/creerCommandeFournisseur";
 import { listerCommandes } from "../../../application/commandes/listerCommandes";
 import { validerCommande } from "../../../application/commandes/validerCommande";
 import { annulerCommande } from "../../../application/commandes/annulerCommande";
 import { receptionnerCommandeFournisseur } from "../../../application/commandes/receptionnerCommandeFournisseur";
-import type { NouvelleCommande, Commande } from "../../../domain/entities/Commande";
+import type { NouvelleCommande, NouvelleCommandeAchat, Commande } from "../../../domain/entities/Commande";
 import { CommandeInvalideError, validerNouvelleCommande } from "../../../domain/services/validerNouvelleCommande";
 import { PrismaCommandeRepository } from "../../../infrastructure/repositories/PrismaCommandeRepository";
 import { PrismaProduitRepository } from "../../../infrastructure/repositories/PrismaProduitRepository";
 import { PrismaFournisseurRepository } from "../../../infrastructure/repositories/PrismaFournisseurRepository";
+import { PrismaEntrepriseRepository } from "../../../infrastructure/repositories/PrismaEntrepriseRepository";
+import { PrismaTokenConfirmationCommandeRepository } from "../../../infrastructure/repositories/PrismaTokenConfirmationCommandeRepository";
 import { PrismaMouvementStockRepository } from "../../../infrastructure/repositories/PrismaMouvementStockRepository";
 import { PrismaAlerteRepository } from "../../../infrastructure/repositories/PrismaAlerteRepository";
 import { PrismaChargeRepository } from "../../../infrastructure/repositories/PrismaChargeRepository";
+import { EnvoyeurEmailGmail } from "../../../infrastructure/email/EnvoyeurEmailGmail";
 
 export type CreerCommandeState = {
   message?: string;
@@ -25,8 +28,11 @@ export type CreerCommandeState = {
 const commandeRepository = new PrismaCommandeRepository();
 const produitRepository = new PrismaProduitRepository();
 const fournisseurRepository = new PrismaFournisseurRepository();
+const entrepriseRepository = new PrismaEntrepriseRepository();
+const tokenConfirmationRepository = new PrismaTokenConfirmationCommandeRepository();
 const mouvementRepository = new PrismaMouvementStockRepository();
 const alerteRepository = new PrismaAlerteRepository();
+const envoyeurEmail = new EnvoyeurEmailGmail();
 
 function parserLignes(formData: FormData): NouvelleCommande["lignes"] {
   const lignesJson = String(formData.get("lignesJson") ?? "[]");
@@ -64,7 +70,7 @@ export async function creerCommandeAction(
   const fournisseurId = String(formData.get("fournisseurId") ?? "").trim();
   const lignes = parserLignes(formData);
 
-  const donnees: NouvelleCommande = {
+  const donnees: NouvelleCommandeAchat = {
     type: "ACHAT_FOURNISSEUR",
     fournisseurId,
     lignes,
@@ -72,7 +78,18 @@ export async function creerCommandeAction(
 
   try {
     validerNouvelleCommande(donnees);
-    await creerCommande(commandeRepository, produitRepository, entrepriseId, utilisateurId, donnees);
+    await creerCommandeFournisseur(
+      commandeRepository,
+      produitRepository,
+      fournisseurRepository,
+      entrepriseRepository,
+      tokenConfirmationRepository,
+      envoyeurEmail,
+      entrepriseId,
+      utilisateurId,
+      donnees,
+      process.env.APP_URL ?? "http://localhost:3000",
+    );
     revalidatePath("/commandes-fournisseurs");
 
     return {

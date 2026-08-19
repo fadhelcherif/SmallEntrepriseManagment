@@ -85,6 +85,15 @@ export class PrismaCommandeRepository implements CommandeRepository {
     return commandes.map(toCommande);
   }
 
+  async trouverParId(id: string): Promise<Commande | null> {
+    const commande = await this.client.commande.findUnique({
+      where: { id },
+      include: { lignesCommande: true },
+    });
+
+    return commande ? toCommande(commande) : null;
+  }
+
   async changerStatut(id: string, nouveauStatut: StatutCommande): Promise<Commande> {
     const commande = await this.client.commande.update({
       where: { id },

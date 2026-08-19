@@ -8,7 +8,7 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <header className="rounded-lg border border-stone-200 bg-white p-6">
+    <header className="shadow-card rounded-3xl bg-white p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <span className="mb-2 block h-[3px] w-8 rounded-full" style={{ backgroundColor: "var(--color-primary)" }} />

@@ -17,7 +17,7 @@ export function FiltreMouvements({ du, au, produitId, type, produits }: FiltreMo
   const filtreActif = Boolean(du || au || produitId || type);
 
   return (
-    <form method="get" className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
+    <form method="get" className="shadow-card flex flex-wrap items-end gap-3 rounded-3xl bg-white p-4">
       <label className="grid gap-1.5">
         <span className="text-xs font-medium uppercase tracking-wide text-stone-500">Du</span>
         <input type="date" name="du" defaultValue={du} className={champClasses} />

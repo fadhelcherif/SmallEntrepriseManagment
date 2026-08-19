@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { LogOut, Settings, BellRing, UserRound } from "lucide-react";
+import { LogOut, Settings, BellRing, UserRound, Sparkles, ArrowUpRight } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { deconnexionAction } from "./actions";
@@ -39,89 +39,99 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-stone-900" style={variablesThemeEntreprise(entreprise)}>
       <div className="lg:flex">
-        <aside className="bg-stone-900 px-5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col">
-          <div className="mb-8 border-b border-stone-800 pb-6">
-            <p className="font-heading text-lg leading-none font-bold text-white">
-              Vantik<span style={{ color: "var(--color-primary)" }}>.</span>
-            </p>
-            <p className="mt-1.5 truncate text-[11px] font-semibold tracking-wide text-stone-500 uppercase">{entreprise.nom}</p>
+        <aside className="bg-white px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-60 lg:shrink-0 lg:flex-col">
+          <div className="mb-8 flex items-center gap-3 px-1">
+            {entreprise.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={entreprise.logo}
+                alt={entreprise.nom}
+                className="h-11 w-11 shrink-0 rounded-2xl border border-stone-200 bg-white object-contain p-1.5"
+              />
+            ) : (
+              <span
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base font-bold"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+              >
+                {initiale}
+              </span>
+            )}
+            <div className="min-w-0">
+              <p className="truncate font-heading text-base font-bold text-stone-900">{entreprise.nom}</p>
+              <p className="text-[11px] font-medium text-stone-400">Vantik</p>
+            </div>
           </div>
 
           <NavLinks estAdministrateur={estAdministrateur} />
 
-          <form action={deconnexionAction} className="mt-6 lg:mt-auto lg:pt-6">
-            <button
-              type="submit"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-stone-700 bg-stone-800 px-4 py-2.5 text-xs font-semibold tracking-wider text-stone-300 uppercase transition hover:bg-stone-700 hover:text-white"
+          <div className="mt-6 lg:mt-auto lg:pt-6">
+            <Link
+              href="/assistant"
+              className="group flex flex-col gap-3 rounded-2xl p-4 text-white transition hover:opacity-95"
+              style={{ backgroundColor: "#1c1917" }}
             >
-              <LogOut className="h-4 w-4" strokeWidth={1.75} />
-              Se déconnecter
-            </button>
-          </form>
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+              >
+                <Sparkles className="h-4.5 w-4.5" strokeWidth={1.75} />
+              </span>
+              <span className="text-sm leading-snug font-semibold">Besoin de conseils ? Demande à l&apos;assistant Vantik.</span>
+              <span
+                className="inline-flex w-fit items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition group-hover:gap-1.5"
+                style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+              >
+                Ouvrir
+                <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
+              </span>
+            </Link>
+
+            <form action={deconnexionAction} className="mt-3">
+              <button
+                type="submit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold tracking-wide text-stone-400 uppercase transition hover:bg-stone-100 hover:text-stone-700"
+              >
+                <LogOut className="h-4 w-4" strokeWidth={1.75} />
+                Se déconnecter
+              </button>
+            </form>
+          </div>
         </aside>
 
         <div className="min-w-0 flex-1">
           <div>
-            <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 pt-6 pb-4 sm:px-6 lg:px-8">
+            <div className="flex w-full items-center justify-between gap-4 px-5 pt-5 pb-3 sm:px-8">
               <div className="flex min-w-0 items-center gap-3">
-                {entreprise.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={entreprise.logo}
-                    alt={entreprise.nom}
-                    className="h-14 w-14 shrink-0 rounded-full border border-stone-200 bg-white object-contain p-1"
-                  />
-                ) : (
-                  <div
-                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold"
-                    style={{ backgroundColor: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
-                  >
-                    {initiale}
-                  </div>
-                )}
+                <span className="shadow-card flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-400">
+                  <UserRound className="h-6 w-6" strokeWidth={1.5} />
+                </span>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-stone-900">
-                    Bienvenue, {utilisateurConnecte.nom}
-                  </p>
-                  <div className="mt-0.5 flex items-center gap-1.5">
-                    <span className="rounded-full border border-stone-200 bg-stone-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-stone-500 uppercase">
-                      {estAdministrateur ? "Administrateur" : "Employé"}
-                    </span>
-                    <span className="truncate text-xs text-stone-500">{entreprise.nom}</span>
-                  </div>
-                  <span className="mt-2 block h-[3px] w-16 rounded-full" style={{ backgroundColor: "var(--color-primary)" }} />
+                  <p className="text-xs font-medium text-stone-400">Bienvenue</p>
+                  <p className="truncate font-heading text-lg font-bold text-stone-900">{utilisateurConnecte.nom}</p>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden items-center gap-2 sm:flex">
-                  <p className="text-sm font-medium text-stone-700">{utilisateurConnecte.nom}</p>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-stone-300 text-stone-400">
-                    <UserRound className="h-5 w-5" strokeWidth={1.75} />
-                  </span>
-                </div>
-
-                <span className="hidden h-8 w-px bg-stone-200 sm:block" />
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="hidden rounded-full border border-stone-200 bg-white px-3 py-1.5 text-[11px] font-semibold tracking-wide text-stone-500 uppercase sm:inline-block">
+                  {estAdministrateur ? "Administrateur" : "Employé"}
+                </span>
 
                 {estAdministrateur ? (
-                  <>
-                    <Link
-                      href="/parametres"
-                      aria-label="Paramètres"
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
-                    >
-                      <Settings className="h-5.5 w-5.5" strokeWidth={1.75} />
-                    </Link>
-                    <span className="h-8 w-px bg-stone-200" />
-                  </>
+                  <Link
+                    href="/parametres"
+                    aria-label="Paramètres"
+                    className="shadow-card flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-400 transition hover:text-stone-900"
+                  >
+                    <Settings className="h-5 w-5" strokeWidth={1.75} />
+                  </Link>
                 ) : null}
 
                 <Link
                   href="/alertes"
                   aria-label="Alertes"
-                  className="relative flex h-11 w-11 items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                  className="shadow-card relative flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-400 transition hover:text-stone-900"
                 >
-                  <BellRing className="h-5.5 w-5.5" strokeWidth={1.75} />
+                  <BellRing className="h-5 w-5" strokeWidth={1.75} />
                   {alertes.length > 0 ? (
                     <span className="absolute -top-1 -right-1">
                       <CompteurBadge nombre={alertes.length} />

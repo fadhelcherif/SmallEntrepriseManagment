@@ -24,9 +24,3 @@ export const LIBELLE_RISQUE_PREVISION: Record<string, { label: string; variante:
   SURVEILLER: { label: "À surveiller", variante: "avertissement" },
   RISQUE_PERTE: { label: "Risque de perte", variante: "danger" },
 };
-
-export const LIBELLE_MODELE_PREVISION: Record<string, string> = {
-  REGRESSION_LINEAIRE: "Régression linéaire",
-  HOLT: "Holt",
-  HOLT_WINTERS: "Holt-Winters",
-};

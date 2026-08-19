@@ -18,3 +18,10 @@ export class TokenReinitialisationInvalideError extends Error {
     this.name = "TokenReinitialisationInvalideError";
   }
 }
+
+export class TokenConfirmationCommandeInvalideError extends Error {
+  constructor(message = "Ce lien de commande est invalide ou a expiré.") {
+    super(message);
+    this.name = "TokenConfirmationCommandeInvalideError";
+  }
+}

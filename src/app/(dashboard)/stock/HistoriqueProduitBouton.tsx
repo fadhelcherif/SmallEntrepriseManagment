@@ -42,7 +42,7 @@ export function HistoriqueProduitBouton({ produitNom, mouvements }: HistoriquePr
         {mouvements.length === 0 ? (
           <p className="text-sm text-stone-500">Aucun mouvement pour ce produit pour le moment.</p>
         ) : (
-          <div className="max-h-[65vh] overflow-y-auto overflow-x-auto rounded-lg border border-stone-200">
+          <div className="max-h-[65vh] overflow-y-auto overflow-x-auto rounded-2xl border border-stone-200">
             <table className="min-w-full divide-y divide-stone-200 text-left text-sm">
               <thead className="bg-stone-50 text-stone-500">
                 <tr>

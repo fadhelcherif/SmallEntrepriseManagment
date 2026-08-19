@@ -50,6 +50,14 @@ export class PrismaFournisseurRepository implements FournisseurRepository {
     return fournisseurs.map(toFournisseur);
   }
 
+  async trouverParId(id: string): Promise<Fournisseur | null> {
+    const fournisseur = await this.client.fournisseur.findUnique({
+      where: { id },
+    });
+
+    return fournisseur ? toFournisseur(fournisseur) : null;
+  }
+
   async modifier(id: string, donnees: Partial<NouveauFournisseur>): Promise<Fournisseur> {
     const fournisseur = await this.client.fournisseur.update({
       where: { id },
